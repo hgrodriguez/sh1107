@@ -28,12 +28,26 @@ package SH1107 is
 
    type Any_SH1107_Screen is access all SH1107_Screen'Class;
 
+   --------------------------------------------------------------------------
+   --  Initializes a an OLED screen connected by I2C
    procedure Initialize (This    : in out SH1107_Screen;
                          Port    : not null HAL.I2C.Any_I2C_Port;
                          Address : HAL.I2C.I2C_Address);
+
+   --------------------------------------------------------------------------
+   --  Turns on the display
    procedure Turn_On (This : SH1107_Screen);
+
+   --------------------------------------------------------------------------
+   --  Turns off the display
    procedure Turn_Off (This : SH1107_Screen);
 
+   --========================================================================
+   --
+   --  This section is the collection of overriding procedures/functions
+   --  from the parent class
+   --
+   --========================================================================
    overriding
    function Max_Layers
      (This : SH1107_Screen) return Positive is (1);
@@ -141,52 +155,49 @@ private
       Data : HAL.UInt8_Array (1 .. Buffer_Size_In_Byte);
    end record;
 
-   type SH1107_Screen
-     (Buffer_Size_In_Byte : Positive;
-      Width               : Positive;
-      Height              : Positive
-     )
+   type SH1107_Screen (Buffer_Size_In_Byte : Positive;
+                       Width               : Positive;
+                       Height              : Positive
+                      )
    is limited new HAL.Framebuffer.Frame_Buffer_Display with
       record
-         Port                : not null HAL.I2C.Any_I2C_Port;
-         Address             : HAL.I2C.I2C_Address;
+         Port               : not null HAL.I2C.Any_I2C_Port;
+         Address            : HAL.I2C.I2C_Address;
          Memory_Layer       : aliased
            SH1107_Bitmap_Buffer (Buffer_Size_In_Byte);
          Layer_Initialized  : Boolean := False;
          Device_Initialized : Boolean := False;
       end record;
 
+   --========================================================================
+   --
+   --  This section is the collection of overriding procedures/functions
+   --  from the parent class for the Bitmap Buffer
+   --
+   --========================================================================
    overriding
-   procedure Set_Pixel
-     (Buffer  : in out SH1107_Bitmap_Buffer;
-      Pt      : HAL.Bitmap.Point);
+   procedure Set_Pixel (Buffer  : in out SH1107_Bitmap_Buffer;
+                        Pt      : HAL.Bitmap.Point);
 
    overriding
-   procedure Set_Pixel
-     (Buffer  : in out SH1107_Bitmap_Buffer;
-      Pt      : HAL.Bitmap.Point;
-      Color   : HAL.Bitmap.Bitmap_Color);
+   procedure Set_Pixel (Buffer  : in out SH1107_Bitmap_Buffer;
+                        Pt      : HAL.Bitmap.Point;
+                        Color   : HAL.Bitmap.Bitmap_Color);
 
    overriding
-   procedure Set_Pixel
-     (Buffer  : in out SH1107_Bitmap_Buffer;
-      Pt      : HAL.Bitmap.Point;
-      Raw     : HAL.UInt32);
+   procedure Set_Pixel (Buffer  : in out SH1107_Bitmap_Buffer;
+                        Pt      : HAL.Bitmap.Point;
+                        Raw     : HAL.UInt32);
 
    overriding
-   function Pixel
-     (Buffer : SH1107_Bitmap_Buffer;
-      Pt     : HAL.Bitmap.Point)
-      return HAL.Bitmap.Bitmap_Color;
+   function Pixel (Buffer : SH1107_Bitmap_Buffer;
+                   Pt     : HAL.Bitmap.Point) return HAL.Bitmap.Bitmap_Color;
 
    overriding
-   function Pixel
-     (Buffer : SH1107_Bitmap_Buffer;
-      Pt     : HAL.Bitmap.Point)
-      return HAL.UInt32;
+   function Pixel (Buffer : SH1107_Bitmap_Buffer;
+                   Pt     : HAL.Bitmap.Point) return HAL.UInt32;
 
    overriding
-   procedure Fill
-     (Buffer : in out SH1107_Bitmap_Buffer);
+   procedure Fill (Buffer : in out SH1107_Bitmap_Buffer);
 
 end SH1107;
