@@ -14,3 +14,6 @@ Major.Minor.Patch
 ### Minor
 1 = basic version; implementation only supports orentiation UP [without any selection possibility] -> OLED is pointing UPwards, when looking from front and the small flat cable is at the bottom of the display
 2 = implementation supports UP/RIGHT/DOWN/LEFT orientation, so the OLED can be used in any desirable orientation
+
+## Version history
+1.0.1: implemented

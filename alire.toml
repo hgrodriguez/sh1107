@@ -1,6 +1,6 @@
 name = "sh1107"
-description = "Shiny new project"
-version = "0.0.0"
+description = "Implementation of SH11107 OLED driver"
+version = "1.0.1"
 
 authors = ["Holger Rodriguez"]
 maintainers = ["Holger Rodriguez <github@roseng.ch>"]
