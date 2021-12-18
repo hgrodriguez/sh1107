@@ -155,7 +155,8 @@ private
 
    type SH1107_Bitmap_Buffer (Buffer_Size_In_Byte : Positive) is
      new Memory_Mapped_Bitmap.Memory_Mapped_Bitmap_Buffer with record
-      Data : HAL.UInt8_Array (1 .. Buffer_Size_In_Byte);
+      Orientation : SH1107_Orientation;
+      Data        : HAL.UInt8_Array (1 .. Buffer_Size_In_Byte);
    end record;
 
    type SH1107_Screen (Buffer_Size_In_Byte : Positive;

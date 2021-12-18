@@ -162,6 +162,7 @@ package body SH1107 is
       if Layer /= 1 or else Mode /= HAL.Bitmap.M_1 then
          raise Program_Error;
       end if;
+      This.Memory_Layer.Orientation := This.Orientation;
       This.Memory_Layer.Actual_Width  := This.Width;
       This.Memory_Layer.Actual_Height := This.Height;
       This.Memory_Layer.Addr := This.Memory_Layer.Data'Address;
@@ -233,11 +234,10 @@ package body SH1107 is
       Pt      : HAL.Bitmap.Point)
    is
       Index : constant Natural
-        := SH1107.Transformer.Get_Byte_Index (Pt.X, Pt.Y);
+        := SH1107.Transformer.Get_Byte_Index (Buffer.Orientation, Pt.X, Pt.Y);
       Byte  : HAL.UInt8 renames Buffer.Data (Buffer.Data'First + Index);
       Bit   : constant HAL.UInt8
-        := SH1107.Transformer.
-          Bit_Mask_Functions (SH1107.Transformer.THE_VARIANT) (Pt.Y);
+        := SH1107.Transformer.Get_Bit_Mask (Buffer.Orientation, Pt.X, Pt.Y);
       use HAL;
    begin
       if Buffer.Native_Source = 0 then
@@ -289,11 +289,10 @@ package body SH1107 is
       return HAL.UInt32
    is
       Index : constant Natural
-        := SH1107.Transformer.Get_Byte_Index (Pt.X, Pt.Y);
+        := SH1107.Transformer.Get_Byte_Index (Buffer.Orientation, Pt.X, Pt.Y);
       Byte  : HAL.UInt8 renames Buffer.Data (Buffer.Data'First + Index);
       Bit   : constant HAL.UInt8
-        := SH1107.Transformer.
-          Bit_Mask_Functions (SH1107.Transformer.THE_VARIANT) (Pt.Y);
+        := SH1107.Transformer.Get_Bit_Mask (Buffer.Orientation, Pt.X, Pt.Y);
       use HAL;
    begin
       if (Byte and Bit) /= 0 then
