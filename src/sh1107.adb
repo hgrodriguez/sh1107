@@ -22,12 +22,15 @@ package body SH1107 is
    --        Falling_Edge => 2#0100#,
    --        Rising_Edge  => 2#1000#);
 
+--     type SH1107_Screen_I2C is new SH1107_Screen with record
+--        XXX : Integer;
+--     end record;
+
    --  I2C part
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8);
    procedure Write_Command (This : SH1107_Screen;
-                            Cmd  : HAL.UInt8)
-   is
+                            Cmd  : HAL.UInt8) is
    begin
       SH1107.I2C.Write_Command (This.Port, This.Address, Cmd);
    end Write_Command;
@@ -36,8 +39,7 @@ package body SH1107 is
                          Data : HAL.UInt8_Array);
 
    procedure Write_Data (This : SH1107_Screen;
-                         Data : HAL.UInt8_Array)
-   is
+                         Data : HAL.UInt8_Array) is
    begin
       SH1107.I2C.Write_Data (This.Port, This.Address, Data);
    end Write_Data;
@@ -65,14 +67,6 @@ package body SH1107 is
 
    ----------------------
    THE_VARIANT : constant Integer := 1;
-
-   function Get_Transformed_X (Buffer  : SH1107_Bitmap_Buffer;
-                               Pt      : HAL.Bitmap.Point) return Natural;
-   function Get_Transformed_Y (Buffer  : SH1107_Bitmap_Buffer;
-                               Pt      : HAL.Bitmap.Point) return Natural;
-   function Get_Index (Buffer  : SH1107_Bitmap_Buffer;
-                       X       : Natural;
-                       Y       : Natural) return Natural;
 
    function Bit_Mask_1 (Y : Natural) return HAL.UInt8;
    function Bit_Mask_2_3 (Y : Natural) return HAL.UInt8;
@@ -314,19 +308,18 @@ package body SH1107 is
               else HAL.Bitmap.White);
    end Pixel;
 
-   overriding -- IMPLEMENT
+   overriding
    function Pixel
      (Buffer : SH1107_Bitmap_Buffer;
       Pt     : HAL.Bitmap.Point)
       return HAL.UInt32
    is
-      X     : constant Natural := Get_Transformed_X (Buffer, Pt);
-      Y     : constant Natural := Get_Transformed_Y (Buffer, Pt);
-      Index : constant Natural := Get_Index (Buffer, X, Y);
+      Index : constant Natural := Get_Byte_Index (Pt.X, Pt.Y);
       Byte  : HAL.UInt8 renames Buffer.Data (Buffer.Data'First + Index);
+      Bit   : constant HAL.UInt8 := Bit_Mask_Functions (THE_VARIANT) (Pt.Y);
       use HAL;
    begin
-      if (Byte and (Shift_Left (1, Y mod 8))) /= 0 then
+      if (Byte and Bit) /= 0 then
          return 1;
       else
          return 0;
@@ -343,25 +336,6 @@ package body SH1107 is
    begin
       Buffer.Data := (others => Val);
    end Fill;
-
-   function Get_Transformed_X (Buffer  : SH1107_Bitmap_Buffer;
-                               Pt      : HAL.Bitmap.Point) return Natural is
-   begin
-      return Buffer.Width - Buffer.Width + Pt.X;
-   end Get_Transformed_X;
-
-   function Get_Transformed_Y (Buffer  : SH1107_Bitmap_Buffer;
-                               Pt      : HAL.Bitmap.Point) return Natural is
-   begin
-      return Buffer.Height - Buffer.Height + Pt.Y;
-   end Get_Transformed_Y;
-
-   function Get_Index (Buffer  : SH1107_Bitmap_Buffer;
-                       X       : Natural;
-                       Y       : Natural) return Natural is
-   begin
-      return X + (Y / 8) * Buffer.Actual_Width;
-   end Get_Index;
 
    function Bit_Mask_1 (Y : Natural) return HAL.UInt8 is
       LUT : constant HAL.UInt8_Array (0 .. 7)

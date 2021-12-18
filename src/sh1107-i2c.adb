@@ -1,3 +1,13 @@
+--===========================================================================
+--
+--  This package is the implementation of the I2C connection
+--
+--===========================================================================
+--
+--  Copyright 2021 (C) Holger Rodriguez
+--
+--  SPDX-License-Identifier: BSD-3-Clause
+--
 package body SH1107.I2C is
 
    procedure Write_Command (Port    : not null HAL.I2C.Any_I2C_Port;
