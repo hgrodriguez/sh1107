@@ -1,0 +1,9 @@
+name = "sh1107"
+description = "Shiny new project"
+version = "0.0.0"
+
+authors = ["Holger Rodriguez"]
+maintainers = ["Holger Rodriguez <github@roseng.ch>"]
+maintainers-logins = ["hgrodriguez"]
+[[depends-on]]  # Added by alr
+embedded_components = "~0.1.0"  # Added by alr
