@@ -13,18 +13,6 @@ with SH1107.I2C;
 
 package body SH1107 is
 
-   --------------
-   -- Commands --
-   --------------
-   CMD_DISPLAY_OFF          : constant HAL.UInt8 := 16#AE#;
-   CMD_DISPLAY_ON           : constant HAL.UInt8 := 16#AF#;
-
-   CMD_PAGE_ADDRESSING_MODE : constant HAL.UInt8 := 16#20#;
-
-   CMD_SET_PAGE_ADDRESS          : constant HAL.UInt8 := 16#B0#;
-   CMD_SET_LOWER_COLUMN_ADDRESS  : constant HAL.UInt8 := 16#00#;
-   CMD_SET_HIGHER_COLUMN_ADDRESS : constant HAL.UInt8 := 16#10#;
-
    --     type Memory_Addressing_Mode is (Page_Addressing,
    --   Vertical_AddressingLow_Level, High_Level, Falling_Edge, Rising_Edge)
    --       with Size => 4;
@@ -33,28 +21,6 @@ package body SH1107 is
    --        High_Level   => 2#0010#,
    --        Falling_Edge => 2#0100#,
    --        Rising_Edge  => 2#1000#);
-
-   --     DEACTIVATE_SCROLL     : constant := 16#2E#;
-   --     SET_CONTRAST          : constant := 16#81#;
-   --     DISPLAY_ALL_ON_RESUME : constant := 16#A4#;
-   --     DISPLAY_ALL_ON        : constant := 16#A5#;
-   --     NORMAL_DISPLAY        : constant := 16#A6#;
-   --     INVERT_DISPLAY        : constant := 16#A7#;
-   --     SET_DISPLAY_OFFSET    : constant := 16#D3#;
-   --     SET_COMPINS           : constant := 16#DA#;
-   --     SET_VCOM_DETECT       : constant := 16#DB#;
-   --     SET_DISPLAY_CLOCK_DIV : constant := 16#D5#;
-   --     SET_PRECHARGE         : constant := 16#D9#;
-   --     SET_MULTIPLEX         : constant := 16#A8#;
-   --     SET_LOW_COLUMN        : constant := 16#00#;
-   --     SET_HIGH_COLUMN       : constant := 16#10#;
-   --     SET_START_LINE        : constant := 16#40#;
-   --     COLUMN_ADDR           : constant := 16#21#;
-   --     PAGE_ADDR             : constant := 16#22#;
-   --     COM_SCAN_INC          : constant := 16#C0#;
-   --     COM_SCAN_DEC          : constant := 16#C8#;
-   --     SEGREMAP              : constant := 16#A0#;
-   --     CHARGE_PUMP           : constant := 16#8D#;
 
    --  I2C part
    procedure Write_Command (This : SH1107_Screen;
@@ -145,48 +111,15 @@ package body SH1107 is
 
       Write_Command (This, CMD_DISPLAY_OFF);
       Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
-
-      --
-      --        Write_Command (This, SET_DISPLAY_CLOCK_DIV);
-      --        Write_Command (This, 16#80#);
-      --
-      --        Write_Command (This, SET_MULTIPLEX);
-      --        Write_Command (This, UInt8 (This.Height - 1));
-      --
-      --        Write_Command (This, SET_DISPLAY_OFFSET);
-      --        Write_Command (This, 16#00#);
-      --
-      --        Write_Command (This, SET_START_LINE or 0);
-      --
-      --        Write_Command (This, CHARGE_PUMP);
-      --    Write_Command (This, (if External_VCC then 16#10# else 16#14#));
-      --
-      --        Write_Command (This, MEMORY_MODE);
-      --        Write_Command (This, 16#00#);
-      --
-      --        Write_Command (This, SEGREMAP or 1);
-      --
-      --        Write_Command (This, COM_SCAN_DEC);
-      --
-      --        Write_Command (This, SET_COMPINS);
-      --        if This.Height > 32 then
-      --           Write_Command (This, 16#12#);
-      --        else
-      --           Write_Command (This, 16#02#);
-      --        end if;
-      --
-      --        Write_Command (This, SET_CONTRAST);
-      --        Write_Command (This, 16#AF#);
-      --
-      --        Write_Command (This, SET_PRECHARGE);
-      --  Write_Command (This, (if External_VCC then 16#22# else 16#F1#));
-      --
-      --        Write_Command (This, SET_VCOM_DETECT);
-      --        Write_Command (This, 16#40#);
-      --
+      Write_Command (This, CMD_SET_DISPLAY_OFFSET);
+      Write_Command (This, 16#00#);
+      Write_Command (This, CMD_SEGMENT_REMAP_DOWN);
+      Write_Command (This, CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT);
+      Write_Command (This, CMD_SET_CONTRAST);
       Write_Command (This, CMD_DISPLAY_ON);
-      --        Write_Command (This, NORMAL_DISPLAY);
-      --        Write_Command (This, DEACTIVATE_SCROLL);
+      Write_Command (This, CMD_NORMAL_DISPLAY);
+      Write_Command (This, CMD_SET_DISPLAY_START_LINE);
+      Write_Command (This, 16#00#);
 
       This.Device_Initialized := True;
    end Initialize;

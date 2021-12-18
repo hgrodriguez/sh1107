@@ -121,6 +121,27 @@ package SH1107 is
       Layer   : Positive) return Positive;
 
 private
+   --------------------------------------------------------------------------
+   --  Commands
+   --------------------------------------------------------------------------
+   --  Display On/Off
+   CMD_DISPLAY_OFF          : constant HAL.UInt8 := 16#AE#;
+   CMD_DISPLAY_ON           : constant HAL.UInt8 := 16#AF#;
+
+   --  Setup commands to initialize the display
+   CMD_PAGE_ADDRESSING_MODE                  : constant HAL.UInt8 := 16#20#;
+   CMD_SET_CONTRAST                          : constant HAL.UInt8 := 16#81#;
+   CMD_SEGMENT_REMAP_DOWN                    : constant HAL.UInt8 := 16#A0#;
+   CMD_NORMAL_DISPLAY                        : constant HAL.UInt8 := 16#A6#;
+   CMD_SET_DISPLAY_OFFSET                    : constant HAL.UInt8 := 16#D3#;
+   CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT : constant HAL.UInt8 := 16#C0#;
+   CMD_SET_DISPLAY_START_LINE                : constant HAL.UInt8 := 16#DC#;
+
+   --  Memory addressing
+   CMD_SET_PAGE_ADDRESS                      : constant HAL.UInt8 := 16#B0#;
+   CMD_SET_LOWER_COLUMN_ADDRESS              : constant HAL.UInt8 := 16#00#;
+   CMD_SET_HIGHER_COLUMN_ADDRESS             : constant HAL.UInt8 := 16#10#;
+
    type SH1107_Bitmap_Buffer (Buffer_Size_In_Byte : Positive) is
      new Memory_Mapped_Bitmap.Memory_Mapped_Bitmap_Buffer with record
       Data : HAL.UInt8_Array (1 .. Buffer_Size_In_Byte);
