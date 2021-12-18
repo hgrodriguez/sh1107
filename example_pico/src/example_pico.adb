@@ -59,9 +59,7 @@ procedure Example_Pico is
 
    My_SH1107_Screen  : SH1107.SH1107_Screen (THE_BUFFER_SIZE_IN_BYTES,
                                              THE_WIDTH,
-                                             THE_HEIGHT,
-                                             Port => My_I2C'Access,
-                                             Address => 16#3C#);
+                                             THE_HEIGHT);
    Corner_0_0        : constant HAL.Bitmap.Point := (0, 0);
    Corner_1_1        : constant HAL.Bitmap.Point := (1, 1);
    Corner_0_127      : constant HAL.Bitmap.Point := (0, THE_HEIGHT - 1);
@@ -296,7 +294,9 @@ procedure Example_Pico is
 
    procedure Use_SH1107 is
    begin
-      SH1107.Initialize (This       => My_SH1107_Screen);
+      SH1107.Initialize (This    => My_SH1107_Screen,
+                         Port    => My_I2C'Access,
+                         Address => 16#3C#);
       if not SH1107.Initialized (This => My_SH1107_Screen) then
          Pico.LED.Clear;
       end if;

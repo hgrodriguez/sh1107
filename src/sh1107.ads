@@ -21,22 +21,16 @@ package SH1107 is
 
    type SH1107_Screen
      (Buffer_Size_In_Byte : Positive;
-      Width               : Positive;
-      --  Width in pixel
-
-      Height              : Positive;
-      --  Height in pixel
-
-      Port                : not null HAL.I2C.Any_I2C_Port;
-      --  I2C communication port. Depending on the bus configuration, SSD1306
-      --  drivers can work up to 1MHz.
-
-      Address             : HAL.I2C.I2C_Address)
+      Width               : Positive;  --  Width in pixel
+      Height              : Positive   --  Height in pixel
+      )
    is limited new HAL.Framebuffer.Frame_Buffer_Display with private;
 
    type Any_SH1107_Screen is access all SH1107_Screen'Class;
 
-   procedure Initialize (This : in out SH1107_Screen);
+   procedure Initialize (This    : in out SH1107_Screen;
+                         Port    : not null HAL.I2C.Any_I2C_Port;
+                         Address : HAL.I2C.I2C_Address);
    procedure Turn_On (This : SH1107_Screen);
    procedure Turn_Off (This : SH1107_Screen);
 
@@ -150,12 +144,12 @@ private
    type SH1107_Screen
      (Buffer_Size_In_Byte : Positive;
       Width               : Positive;
-      Height              : Positive;
-      Port                : not null HAL.I2C.Any_I2C_Port;
-      Address             : HAL.I2C.I2C_Address)
+      Height              : Positive
+     )
    is limited new HAL.Framebuffer.Frame_Buffer_Display with
       record
-
+         Port                : not null HAL.I2C.Any_I2C_Port;
+         Address             : HAL.I2C.I2C_Address;
          Memory_Layer       : aliased
            SH1107_Bitmap_Buffer (Buffer_Size_In_Byte);
          Layer_Initialized  : Boolean := False;

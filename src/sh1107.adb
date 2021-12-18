@@ -103,11 +103,16 @@ package body SH1107 is
 
    function Get_Byte_Index (X, Y : Natural) return Natural;
 
-   procedure Initialize (This       : in out SH1107_Screen) is
+   procedure Initialize (This       : in out SH1107_Screen;
+                         Port       : not null HAL.I2C.Any_I2C_Port;
+                         Address    : HAL.I2C.I2C_Address) is
    begin
       if This.Width * This.Height /= (This.Buffer_Size_In_Byte * 8) then
          raise Program_Error with "Invalid screen parameters";
       end if;
+
+      This.Port := Port;
+      This.Address := Address;
 
       Write_Command (This, CMD_DISPLAY_OFF);
       Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
