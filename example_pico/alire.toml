@@ -1,0 +1,13 @@
+name = "example_pico"
+description = "Shiny new project"
+version = "0.0.0"
+
+authors = ["Holger Rodriguez"]
+maintainers = ["Holger Rodriguez <github@roseng.ch>"]
+maintainers-logins = ["hgrodriguez"]
+
+executables = ["example_pico"]
+[[depends-on]]  # Added by alr
+pico_bsp = "~0.6.0"  # Added by alr
+[[depends-on]]  # Added by alr
+embedded_components = "~0.1.0"  # Added by alr
