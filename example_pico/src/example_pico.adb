@@ -296,8 +296,7 @@ procedure Example_Pico is
 
    procedure Use_SH1107 is
    begin
-      SH1107.Initialize (This       => My_SH1107_Screen,
-                         This_Delay => Initialize_Timer'Unchecked_Access);
+      SH1107.Initialize (This       => My_SH1107_Screen);
       if not SH1107.Initialized (This => My_SH1107_Screen) then
          Pico.LED.Clear;
       end if;

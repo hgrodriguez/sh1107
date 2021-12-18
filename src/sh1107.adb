@@ -9,48 +9,9 @@
 --  SPDX-License-Identifier: BSD-3-Clause
 --
 
+with SH1107.I2C;
+
 package body SH1107 is
-   procedure Write_Raw_Pixels (This : SH1107_Screen;
-                               Data : HAL.UInt8_Array);
-
-   THE_VARIANT : constant Integer := 1;
-
-   function Get_Transformed_X (Buffer  : SH1107_Bitmap_Buffer;
-                               Pt      : HAL.Bitmap.Point) return Natural;
-   function Get_Transformed_Y (Buffer  : SH1107_Bitmap_Buffer;
-                               Pt      : HAL.Bitmap.Point) return Natural;
-   function Get_Index (Buffer  : SH1107_Bitmap_Buffer;
-                       X       : Natural;
-                       Y       : Natural) return Natural;
-
-   function Bit_Mask_1 (Y : Natural) return HAL.UInt8;
-   function Bit_Mask_2_3 (Y : Natural) return HAL.UInt8;
-   type Bit_Mask_Function is access function (Y : Natural) return HAL.UInt8;
-   Bit_Mask_Functions : constant array (1 .. 3) of Bit_Mask_Function
-     := (1 => Bit_Mask_1'Access,
-         2 => Bit_Mask_2_3'Access,
-         3 => Bit_Mask_2_3'Access
-        );
-
-   function Get_Page_1_2 (Y : Natural) return Natural;
-   function Get_Page_3 (Y : Natural) return Natural;
-   type Get_Page_Function is access function (Y : Natural) return Natural;
-   Get_Page_Functions : constant array (1 .. 3) of Get_Page_Function
-     := (1 => Get_Page_1_2'Access,
-         2 => Get_Page_1_2'Access,
-         3 => Get_Page_3'Access
-        );
-
-   function Get_Column_1_2 (X : Natural) return Natural;
-   function Get_Column_3 (X : Natural) return Natural;
-   type Get_Column_Function is access function (X : Natural) return Natural;
-   Get_Column_Functions : constant array (1 .. 3) of Get_Column_Function
-     := (1 => Get_Column_1_2'Access,
-         2 => Get_Column_1_2'Access,
-         3 => Get_Column_3'Access
-        );
-
-   function Get_Byte_Index (X, Y : Natural) return Natural;
 
    --------------
    -- Commands --
@@ -95,33 +56,15 @@ package body SH1107 is
    --     SEGREMAP              : constant := 16#A0#;
    --     CHARGE_PUMP           : constant := 16#8D#;
 
-   SH1107_I2C_Address             : HAL.I2C.I2C_Address;
-
+   --  I2C part
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8);
-
-   -------------------
-   -- Write_Command --
-   -------------------
-
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8)
    is
-      Status : HAL.I2C.I2C_Status;
-      use HAL.I2C;
    begin
-      This.Port.Master_Transmit (Addr    => SH1107_I2C_Address,
-                                 Data    => (1 => 0, 2 => (Cmd)),
-                                 Status  => Status);
-      if Status /= HAL.I2C.Ok then
-         --  No error handling...
-         raise Program_Error;
-      end if;
+      SH1107.I2C.Write_Command (This.Port, This.Address, Cmd);
    end Write_Command;
-
-   ----------------
-   -- Write_Data --
-   ----------------
 
    procedure Write_Data (This : SH1107_Screen;
                          Data : HAL.UInt8_Array);
@@ -129,28 +72,76 @@ package body SH1107 is
    procedure Write_Data (This : SH1107_Screen;
                          Data : HAL.UInt8_Array)
    is
-      Status : HAL.I2C.I2C_Status;
-      use HAL.I2C;
    begin
-      This.Port.Master_Transmit (Addr    => SH1107_I2C_Address,
-                                 Data    => Data,
-                                 Status  => Status);
-      if Status /= HAL.I2C.Ok then
-         --  No error handling...
-         raise Program_Error;
-      end if;
+      SH1107.I2C.Write_Data (This.Port, This.Address, Data);
    end Write_Data;
 
-   procedure Initialize (This       : in out SH1107_Screen;
-                         This_Delay : HAL.Time.Any_Delays) is
+   procedure Write_Raw_Pixels (This : SH1107_Screen;
+                               Data : HAL.UInt8_Array);
+
+   procedure Write_Raw_Pixels (This : SH1107_Screen;
+                               Data : HAL.UInt8_Array) is
+      Index         : Natural := 1;
+
+      Page_Address  : HAL.UInt8;
       use HAL;
+   begin
+      for Page_Number in HAL.UInt8 (0) .. HAL.UInt8 (15) loop
+         Page_Address := CMD_SET_PAGE_ADDRESS + Page_Number;
+         Write_Command (This, CMD_SET_LOWER_COLUMN_ADDRESS);
+         Write_Command (This, CMD_SET_HIGHER_COLUMN_ADDRESS);
+         Write_Command (This, Page_Address);
+         Write_Data (This,
+                     (1 => 16#40#) & Data (Index .. Index + 128));
+         Index := Index + 128;
+      end loop;
+   end Write_Raw_Pixels;
+
+   ----------------------
+   THE_VARIANT : constant Integer := 1;
+
+   function Get_Transformed_X (Buffer  : SH1107_Bitmap_Buffer;
+                               Pt      : HAL.Bitmap.Point) return Natural;
+   function Get_Transformed_Y (Buffer  : SH1107_Bitmap_Buffer;
+                               Pt      : HAL.Bitmap.Point) return Natural;
+   function Get_Index (Buffer  : SH1107_Bitmap_Buffer;
+                       X       : Natural;
+                       Y       : Natural) return Natural;
+
+   function Bit_Mask_1 (Y : Natural) return HAL.UInt8;
+   function Bit_Mask_2_3 (Y : Natural) return HAL.UInt8;
+   type Bit_Mask_Function is access function (Y : Natural) return HAL.UInt8;
+   Bit_Mask_Functions : constant array (1 .. 3) of Bit_Mask_Function
+     := (1 => Bit_Mask_1'Access,
+         2 => Bit_Mask_2_3'Access,
+         3 => Bit_Mask_2_3'Access
+        );
+
+   function Get_Page_1_2 (Y : Natural) return Natural;
+   function Get_Page_3 (Y : Natural) return Natural;
+   type Get_Page_Function is access function (Y : Natural) return Natural;
+   Get_Page_Functions : constant array (1 .. 3) of Get_Page_Function
+     := (1 => Get_Page_1_2'Access,
+         2 => Get_Page_1_2'Access,
+         3 => Get_Page_3'Access
+        );
+
+   function Get_Column_1_2 (X : Natural) return Natural;
+   function Get_Column_3 (X : Natural) return Natural;
+   type Get_Column_Function is access function (X : Natural) return Natural;
+   Get_Column_Functions : constant array (1 .. 3) of Get_Column_Function
+     := (1 => Get_Column_1_2'Access,
+         2 => Get_Column_1_2'Access,
+         3 => Get_Column_3'Access
+        );
+
+   function Get_Byte_Index (X, Y : Natural) return Natural;
+
+   procedure Initialize (This       : in out SH1107_Screen) is
    begin
       if This.Width * This.Height /= (This.Buffer_Size_In_Byte * 8) then
          raise Program_Error with "Invalid screen parameters";
       end if;
-      SH1107_I2C_Address := This.Address * 2;
-
-      This_Delay.Delay_Milliseconds (100);
 
       Write_Command (This, CMD_DISPLAY_OFF);
       Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
@@ -210,28 +201,6 @@ package body SH1107 is
       Write_Command (This, CMD_DISPLAY_OFF);
    end Turn_Off;
 
-   procedure Write_Raw_Pixels (This : SH1107_Screen;
-                               Data : HAL.UInt8_Array) is
-      Index         : Natural := 1;
-
-      Page_Address  : HAL.UInt8;
-      use HAL;
-   begin
-      for Page_Number in HAL.UInt8 (0) .. HAL.UInt8 (15) loop
-         Page_Address := CMD_SET_PAGE_ADDRESS + Page_Number;
-         Write_Command (This, CMD_SET_LOWER_COLUMN_ADDRESS);
-         Write_Command (This, CMD_SET_HIGHER_COLUMN_ADDRESS);
-         Write_Command (This, Page_Address);
-         Write_Data (This,
-                     (1 => 16#40#) & Data (Index .. Index + 128));
-         Index := Index + 128;
-      end loop;
-   end Write_Raw_Pixels;
-
-   overriding
-   function Max_Layers
-     (This : SH1107_Screen) return Positive is (1);
-
    overriding
    function Supported
      (This : SH1107_Screen;
@@ -266,18 +235,6 @@ package body SH1107 is
    function Initialized
      (This : SH1107_Screen) return Boolean is
      (This.Device_Initialized);
-
-   overriding
-   function Width
-     (This : SH1107_Screen) return Positive is (This.Width);
-
-   overriding
-   function Height
-     (This : SH1107_Screen) return Positive is (This.Height);
-
-   overriding
-   function Swapped
-     (This : SH1107_Screen) return Boolean is (False);
 
    overriding
    procedure Set_Background

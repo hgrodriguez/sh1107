@@ -14,7 +14,6 @@ with HAL.Bitmap;
 with HAL.Framebuffer;
 with HAL.GPIO;
 with HAL.I2C;
-with HAL.Time;
 
 with Memory_Mapped_Bitmap;
 
@@ -22,8 +21,6 @@ package SH1107 is
 
    type SH1107_Screen
      (Buffer_Size_In_Byte : Positive;
-      --  Number of byte in the bitmap buffer: ((Width * Height) / 8)
-
       Width               : Positive;
       --  Width in pixel
 
@@ -39,14 +36,13 @@ package SH1107 is
 
    type Any_SH1107_Screen is access all SH1107_Screen'Class;
 
-   procedure Initialize (This       : in out SH1107_Screen;
-                         This_Delay : HAL.Time.Any_Delays);
+   procedure Initialize (This : in out SH1107_Screen);
    procedure Turn_On (This : SH1107_Screen);
    procedure Turn_Off (This : SH1107_Screen);
 
    overriding
    function Max_Layers
-     (This : SH1107_Screen) return Positive;
+     (This : SH1107_Screen) return Positive is (1);
 
    overriding
    function Supported
@@ -69,15 +65,15 @@ package SH1107 is
 
    overriding
    function Width
-     (This : SH1107_Screen) return Positive;
+     (This : SH1107_Screen) return Positive is (This.Width);
 
    overriding
    function Height
-     (This : SH1107_Screen) return Positive;
+     (This : SH1107_Screen) return Positive is (This.Height);
 
    overriding
    function Swapped
-     (This : SH1107_Screen) return Boolean;
+     (This : SH1107_Screen) return Boolean is (False);
 
    overriding
    procedure Set_Background
@@ -138,6 +134,7 @@ private
       Address             : HAL.I2C.I2C_Address)
    is limited new HAL.Framebuffer.Frame_Buffer_Display with
       record
+
          Memory_Layer       : aliased
            SH1107_Bitmap_Buffer (Buffer_Size_In_Byte);
          Layer_Initialized  : Boolean := False;
