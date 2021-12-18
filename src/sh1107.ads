@@ -19,6 +19,8 @@ with Memory_Mapped_Bitmap;
 
 package SH1107 is
 
+   type SH1107_Orientation is (Up, Right, Down, Left);
+
    type SH1107_Screen
      (Buffer_Size_In_Byte : Positive;
       Width               : Positive;  --  Width in pixel
@@ -30,9 +32,10 @@ package SH1107 is
 
    --------------------------------------------------------------------------
    --  Initializes a an OLED screen connected by I2C
-   procedure Initialize (This    : in out SH1107_Screen;
-                         Port    : not null HAL.I2C.Any_I2C_Port;
-                         Address : HAL.I2C.I2C_Address);
+   procedure Initialize (This        : in out SH1107_Screen;
+                         Orientation : SH1107_Orientation;
+                         Port        : not null HAL.I2C.Any_I2C_Port;
+                         Address     : HAL.I2C.I2C_Address);
 
    --------------------------------------------------------------------------
    --  Turns on the display
@@ -161,6 +164,7 @@ private
                       )
    is limited new HAL.Framebuffer.Frame_Buffer_Display with
       record
+         Orientation        : SH1107_Orientation;
          Port               : not null HAL.I2C.Any_I2C_Port;
          Address            : HAL.I2C.I2C_Address;
          Memory_Layer       : aliased

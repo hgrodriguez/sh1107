@@ -295,6 +295,7 @@ procedure Example_Pico is
    procedure Use_SH1107 is
    begin
       SH1107.Initialize (This    => My_SH1107_Screen,
+                         Orientation => SH1107.Up,
                          Port    => My_I2C'Access,
                          Address => 16#3C#);
       if not SH1107.Initialized (This => My_SH1107_Screen) then
