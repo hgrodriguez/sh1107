@@ -39,7 +39,7 @@ procedure Example_Pico is
                            );
 
    DEMO_SELECTED : constant Demos_Available
-     := Show_All;
+     := White_Diagonal_Line_On_Black;
 
    My_Color_Mode : HAL.Framebuffer.FB_Color_Mode;
 
