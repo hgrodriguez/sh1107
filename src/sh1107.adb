@@ -92,6 +92,7 @@ package body SH1107 is
       Write_Command (This, CMD_NORMAL_DISPLAY);
       Write_Command (This, CMD_SET_DISPLAY_START_LINE);
       Write_Command (This, 16#00#);
+      Write_Command (This, CMD_DISPLAY_ON);
 
       This.Device_Initialized := True;
    end Initialize;
