@@ -45,6 +45,12 @@ package SH1107 is
    --  Turns off the display
    procedure Turn_Off (This : SH1107_Screen);
 
+   --------------------------------------------------------------------------
+   --  Sets the logical orientation of the display
+   procedure Set_Orientation
+     (This        : in out SH1107_Screen;
+      Orientation : SH1107_Orientation);
+
    --========================================================================
    --
    --  This section is the collection of overriding procedures/functions

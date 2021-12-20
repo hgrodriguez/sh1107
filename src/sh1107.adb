@@ -105,6 +105,14 @@ package body SH1107 is
       Write_Command (This, CMD_DISPLAY_OFF);
    end Turn_Off;
 
+   procedure Set_Orientation
+     (This        : in out SH1107_Screen;
+      Orientation : SH1107_Orientation) is
+   begin
+      This.Orientation := Orientation;
+      This.Memory_Layer.Orientation := Orientation;
+   end Set_Orientation;
+
    overriding
    function Supported
      (This : SH1107_Screen;

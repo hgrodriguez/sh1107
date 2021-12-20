@@ -27,9 +27,10 @@ with SH1107;
 
 procedure Example_Pico is
 
-   ORENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Left;
+   ORENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Up;
 
    type Demos_Available is (Show_All,
+                            Black_Background_White_Arrow,
                             White_Background_With_Black_Rectangle_Full_Screen,
                             Black_Background_With_White_Rectangle_Full_Screen,
                             White_Background_4_Black_Corners,
@@ -41,7 +42,7 @@ procedure Example_Pico is
                            );
 
    DEMO_SELECTED : constant Demos_Available
-     := Black_Background_White_Geometry;
+     := Black_Background_White_Arrow;
 
    My_Color_Mode : HAL.Framebuffer.FB_Color_Mode;
 
@@ -85,6 +86,44 @@ procedure Example_Pico is
 
    procedure P_White_Diagonal_Line_On_Black;
    procedure P_Black_Diagonal_Line_On_White;
+
+   procedure P_Black_Background_White_Arrow is
+      Corners : constant HAL.Bitmap.Point_Array (1 .. 7)
+        := (
+            1 => (40, 118),
+            2 => (86, 118),
+            3 => (86, 60),
+            4 => (96, 60),
+            5 => (63, 10),
+            6 => (30, 60),
+            7 => (40, 60));
+      Start   : HAL.Bitmap.Point;
+      Stop    : HAL.Bitmap.Point;
+   begin
+      My_Hidden_Buffer.Set_Source (Native => 0);
+      My_Hidden_Buffer.Fill;
+      SH1107.Update_Layer (This      => My_SH1107_Screen,
+                           Layer     => THE_LAYER);
+      RP.Timer.Delay_Seconds (This => Another_Timer,
+                              S    => 1);
+
+      My_Hidden_Buffer.Set_Source (Native => 1);
+
+      for N in Corners'First .. Corners'Last loop
+         Start := Corners (N);
+         if N = Corners'Last then
+            Stop := Corners (1);
+         else
+            Stop := Corners (N + 1);
+         end if;
+         My_Hidden_Buffer.Draw_Line (Start, Stop);
+      end loop;
+
+      SH1107.Update_Layer (This      => My_SH1107_Screen,
+                           Layer     => THE_LAYER);
+      RP.Timer.Delay_Seconds (This => Another_Timer,
+                              S    => 1);
+   end P_Black_Background_White_Arrow;
 
    procedure P_White_Background_With_Black_Rectangle_Full_Screen is
    begin
@@ -315,8 +354,14 @@ procedure Example_Pico is
                                                 Layer => THE_LAYER);
 
       loop
-         case DEMO_SELECTED is
+         for O in SH1107.SH1107_Orientation'First
+           ..
+             SH1107.SH1107_Orientation'Last loop
+            My_SH1107_Screen.Set_Orientation (O);
+
+            case DEMO_SELECTED is
             when Show_All =>
+               P_Black_Background_White_Arrow;
                P_White_Background_With_Black_Rectangle_Full_Screen;
                P_Black_Background_With_White_Rectangle_Full_Screen;
                P_White_Background_4_Black_Corners;
@@ -341,7 +386,10 @@ procedure Example_Pico is
                P_White_Diagonal_Line_On_Black;
             when Black_Diagonal_Line_On_White =>
                P_Black_Diagonal_Line_On_White;
-         end case;
+            when Black_Background_White_Arrow =>
+               P_Black_Background_White_Arrow;
+            end case;
+         end loop;
       end loop;
    end Use_SH1107;
 

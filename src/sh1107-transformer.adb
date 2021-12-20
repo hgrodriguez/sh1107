@@ -37,7 +37,7 @@ package body SH1107.Transformer is
 
    function Get_Page_Right (X : Natural) return Natural is
    begin
-      return X / 8;
+      return 15 - X / 8;
    end Get_Page_Right;
 
    function Get_Page_Down (Y : Natural) return Natural is
