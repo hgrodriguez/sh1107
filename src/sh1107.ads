@@ -12,13 +12,20 @@
 with HAL;
 with HAL.Bitmap;
 with HAL.Framebuffer;
-with HAL.GPIO;
 with HAL.I2C;
 
 with Memory_Mapped_Bitmap;
 
 package SH1107 is
 
+   --------------------------------------------------------------------------
+   --  Possible orientations of the OLED display
+   --     Think of it as, how you would see it, when the display itself
+   --     is laid out to the flat cable connector.
+   --     Up = The display is pointing UP relative to the cable
+   --     Right = The display is pointing RIGHT relative to the cable
+   --     Down = The display is pointing DOWN relative to the cable
+   --     Left = The display is pointing LEFT relative to the cable
    type SH1107_Orientation is (Up, Right, Down, Left);
 
    type SH1107_Screen

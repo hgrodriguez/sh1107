@@ -1,6 +1,6 @@
 --===========================================================================
 --
---  This package is the interface to the LED part of the EDC Client
+--  This package is the implementation of the SH1107 package
 --
 --===========================================================================
 --
@@ -13,19 +13,6 @@ with SH1107.I2C;
 with SH1107.Transformer;
 
 package body SH1107 is
-
-   --     type Memory_Addressing_Mode is (Page_Addressing,
-   --   Vertical_AddressingLow_Level, High_Level, Falling_Edge, Rising_Edge)
-   --       with Size => 4;
-   --     for Interrupt_Triggers use
-   --       (Low_Level    => 2#0001#,
-   --        High_Level   => 2#0010#,
-   --        Falling_Edge => 2#0100#,
-   --        Rising_Edge  => 2#1000#);
-
---     type SH1107_Screen_I2C is new SH1107_Screen with record
---        XXX : Integer;
---     end record;
 
    --  I2C part
    procedure Write_Command (This : SH1107_Screen;
