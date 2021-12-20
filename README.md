@@ -16,4 +16,5 @@ Major.Minor.Patch
 2 = implementation supports UP/RIGHT/DOWN/LEFT orientation, so the OLED can be used in any desirable orientation
 
 ## Version history
+1.2.0: implemented
 1.0.1: implemented
