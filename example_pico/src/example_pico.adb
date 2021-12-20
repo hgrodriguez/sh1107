@@ -27,7 +27,7 @@ with SH1107;
 
 procedure Example_Pico is
 
-   ORENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Down;
+   ORENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Left;
 
    type Demos_Available is (Show_All,
                             White_Background_With_Black_Rectangle_Full_Screen,
