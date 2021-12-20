@@ -2,12 +2,13 @@ package body SH1107.I2C is
 
    procedure Write_Command (Port    : not null HAL.I2C.Any_I2C_Port;
                             Address : HAL.I2C.I2C_Address;
-                            Cmd     : HAL.UInt8)
-   is
+                            Cmd     : HAL.UInt8) is
+      use HAL;
+      Correct_Address : constant HAL.I2C.I2C_Address := Address * 2;
       Status : HAL.I2C.I2C_Status;
       use HAL.I2C;
    begin
-      Port.Master_Transmit (Addr    => Address,
+      Port.Master_Transmit (Addr    => Correct_Address,
                             Data    => (1 => 0, 2 => (Cmd)),
                             Status  => Status);
       if Status /= HAL.I2C.Ok then
@@ -18,12 +19,13 @@ package body SH1107.I2C is
 
    procedure Write_Data (Port    : not null HAL.I2C.Any_I2C_Port;
                          Address : HAL.I2C.I2C_Address;
-                         Data    : HAL.UInt8_Array)
-   is
-      Status : HAL.I2C.I2C_Status;
+                         Data    : HAL.UInt8_Array) is
+      use HAL;
+      Correct_Address : constant HAL.I2C.I2C_Address := Address * 2;
+      Status          : HAL.I2C.I2C_Status;
       use HAL.I2C;
    begin
-      Port.Master_Transmit (Addr    => Address,
+      Port.Master_Transmit (Addr    => Correct_Address,
                             Data    => Data,
                             Status  => Status);
       if Status /= HAL.I2C.Ok then

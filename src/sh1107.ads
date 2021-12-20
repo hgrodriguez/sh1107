@@ -161,8 +161,8 @@ private
                       )
    is limited new HAL.Framebuffer.Frame_Buffer_Display with
       record
-         Port               : not null HAL.I2C.Any_I2C_Port;
-         Address            : HAL.I2C.I2C_Address;
+         Port                : HAL.I2C.Any_I2C_Port;
+         Address             : HAL.I2C.I2C_Address;
          Memory_Layer       : aliased
            SH1107_Bitmap_Buffer (Buffer_Size_In_Byte);
          Layer_Initialized  : Boolean := False;
