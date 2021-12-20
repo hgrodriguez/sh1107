@@ -27,6 +27,8 @@ with SH1107;
 
 procedure Example_Pico is
 
+   ORENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Down;
+
    type Demos_Available is (Show_All,
                             White_Background_With_Black_Rectangle_Full_Screen,
                             Black_Background_With_White_Rectangle_Full_Screen,
@@ -39,7 +41,7 @@ procedure Example_Pico is
                            );
 
    DEMO_SELECTED : constant Demos_Available
-     := White_Diagonal_Line_On_Black;
+     := Black_Background_White_Geometry;
 
    My_Color_Mode : HAL.Framebuffer.FB_Color_Mode;
 
@@ -295,7 +297,7 @@ procedure Example_Pico is
    procedure Use_SH1107 is
    begin
       SH1107.Initialize (This    => My_SH1107_Screen,
-                         Orientation => SH1107.Up,
+                         Orientation => ORENTIATION_SELECTED,
                          Port    => My_I2C'Access,
                          Address => 16#3C#);
       if not SH1107.Initialized (This => My_SH1107_Screen) then
