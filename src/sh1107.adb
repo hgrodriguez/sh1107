@@ -32,9 +32,8 @@ package body SH1107 is
                             Cmd  : HAL.UInt8);
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8) is
-      use HAL;
    begin
-      SH1107.I2C.Write_Command (This.Port, This.Address * 2, Cmd);
+      SH1107.I2C.Write_Command (This.Port, This.Address, Cmd);
    end Write_Command;
 
    procedure Write_Data (This : SH1107_Screen;
@@ -42,9 +41,8 @@ package body SH1107 is
 
    procedure Write_Data (This : SH1107_Screen;
                          Data : HAL.UInt8_Array) is
-      use HAL;
    begin
-      SH1107.I2C.Write_Data (This.Port, This.Address * 2, Data);
+      SH1107.I2C.Write_Data (This.Port, This.Address, Data);
    end Write_Data;
 
    procedure Write_Raw_Pixels (This : SH1107_Screen;
