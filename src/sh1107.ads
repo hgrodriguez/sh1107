@@ -38,7 +38,7 @@ package SH1107 is
    type Any_SH1107_Screen is access all SH1107_Screen'Class;
 
    --------------------------------------------------------------------------
-   --  Initializes a an OLED screen connected by I2C
+   --  Initializes an OLED screen connected by I2C
    procedure Initialize (This        : in out SH1107_Screen;
                          Orientation : SH1107_Orientation;
                          Port        : not null HAL.I2C.Any_I2C_Port;
@@ -145,26 +145,7 @@ package SH1107 is
       Layer   : Positive) return Positive;
 
 private
-   --------------------------------------------------------------------------
-   --  Commands
-   --------------------------------------------------------------------------
-   --  Display On/Off
-   CMD_DISPLAY_OFF          : constant HAL.UInt8 := 16#AE#;
-   CMD_DISPLAY_ON           : constant HAL.UInt8 := 16#AF#;
-
-   --  Setup commands to initialize the display
-   CMD_PAGE_ADDRESSING_MODE                  : constant HAL.UInt8 := 16#20#;
-   CMD_SET_CONTRAST                          : constant HAL.UInt8 := 16#81#;
-   CMD_SEGMENT_REMAP_DOWN                    : constant HAL.UInt8 := 16#A0#;
-   CMD_NORMAL_DISPLAY                        : constant HAL.UInt8 := 16#A6#;
-   CMD_SET_DISPLAY_OFFSET                    : constant HAL.UInt8 := 16#D3#;
-   CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT : constant HAL.UInt8 := 16#C0#;
-   CMD_SET_DISPLAY_START_LINE                : constant HAL.UInt8 := 16#DC#;
-
-   --  Memory addressing
-   CMD_SET_PAGE_ADDRESS                      : constant HAL.UInt8 := 16#B0#;
-   CMD_SET_LOWER_COLUMN_ADDRESS              : constant HAL.UInt8 := 16#00#;
-   CMD_SET_HIGHER_COLUMN_ADDRESS             : constant HAL.UInt8 := 16#10#;
+   type Connector is (Connect_I2C, Connect_SPI);
 
    type SH1107_Bitmap_Buffer (Buffer_Size_In_Byte : Positive) is
      new Memory_Mapped_Bitmap.Memory_Mapped_Bitmap_Buffer with record
@@ -179,12 +160,15 @@ private
    is limited new HAL.Framebuffer.Frame_Buffer_Display with
       record
          Orientation        : SH1107_Orientation;
-         Port               : HAL.I2C.Any_I2C_Port;
-         Address            : HAL.I2C.I2C_Address;
          Memory_Layer       : aliased
            SH1107_Bitmap_Buffer (Buffer_Size_In_Byte);
          Layer_Initialized  : Boolean := False;
          Device_Initialized : Boolean := False;
+         Connection         : Connector;
+         --  In case of I2C:
+         Port               : HAL.I2C.Any_I2C_Port;
+         Address            : HAL.I2C.I2C_Address;
+         --  in case of SPI:
       end record;
 
    --========================================================================

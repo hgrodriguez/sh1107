@@ -14,13 +14,39 @@ with SH1107.Transformer;
 
 package body SH1107 is
 
+   --------------------------------------------------------------------------
+   --  Commands
+   --------------------------------------------------------------------------
+   --  Display On/Off
+   CMD_DISPLAY_OFF          : constant HAL.UInt8 := 16#AE#;
+   CMD_DISPLAY_ON           : constant HAL.UInt8 := 16#AF#;
+
+   --  Setup commands to initialize the display
+   CMD_PAGE_ADDRESSING_MODE                  : constant HAL.UInt8 := 16#20#;
+   CMD_SET_CONTRAST                          : constant HAL.UInt8 := 16#81#;
+   CMD_SEGMENT_REMAP_DOWN                    : constant HAL.UInt8 := 16#A0#;
+   CMD_NORMAL_DISPLAY                        : constant HAL.UInt8 := 16#A6#;
+   CMD_SET_DISPLAY_OFFSET                    : constant HAL.UInt8 := 16#D3#;
+   CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT : constant HAL.UInt8 := 16#C0#;
+   CMD_SET_DISPLAY_START_LINE                : constant HAL.UInt8 := 16#DC#;
+
+   --  Memory addressing
+   CMD_SET_PAGE_ADDRESS                      : constant HAL.UInt8 := 16#B0#;
+   CMD_SET_LOWER_COLUMN_ADDRESS              : constant HAL.UInt8 := 16#00#;
+   CMD_SET_HIGHER_COLUMN_ADDRESS             : constant HAL.UInt8 := 16#10#;
+
    --  I2C part
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8);
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8) is
    begin
-      SH1107.I2C.Write_Command (This.Port, This.Address, Cmd);
+      case This.Connection is
+         when Connect_I2C =>
+            SH1107.I2C.Write_Command (This.Port, This.Address, Cmd);
+         when Connect_SPI =>
+            null;
+      end case;
    end Write_Command;
 
    procedure Write_Data (This : SH1107_Screen;
@@ -29,7 +55,12 @@ package body SH1107 is
    procedure Write_Data (This : SH1107_Screen;
                          Data : HAL.UInt8_Array) is
    begin
-      SH1107.I2C.Write_Data (This.Port, This.Address, Data);
+      case This.Connection is
+         when Connect_I2C =>
+            SH1107.I2C.Write_Data (This.Port, This.Address, Data);
+         when Connect_SPI =>
+            null;
+      end case;
    end Write_Data;
 
    procedure Write_Raw_Pixels (This : SH1107_Screen;
@@ -63,6 +94,7 @@ package body SH1107 is
       end if;
 
       This.Orientation := Orientation;
+      This.Connection := Connect_I2C;
       This.Port := Port;
       This.Address := Address;
 
