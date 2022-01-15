@@ -1,9 +1,13 @@
 name = "sh1107"
 description = "Implementation of SH11107 OLED driver"
 version = "1.2.0"
+licenses = "BSD-3-Clause"
 
 authors = ["Holger Rodriguez"]
 maintainers = ["Holger Rodriguez <github@roseng.ch>"]
 maintainers-logins = ["hgrodriguez"]
+tags = ["embedded", "rp2040"]
+website = "https://github.com/hgrodriguez/sh1107"
+
 [[depends-on]]  # Added by alr
 embedded_components = "~0.1.0"  # Added by alr
