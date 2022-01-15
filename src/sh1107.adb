@@ -43,7 +43,7 @@ package body SH1107 is
    begin
       case This.Connection is
          when Connect_I2C =>
-            SH1107.I2C.Write_Command (This.Port, This.Address, Cmd);
+            SH1107.I2C.Write_Command (This.Port_I2C, This.Address_I2C, Cmd);
          when Connect_SPI =>
             null;
       end case;
@@ -57,7 +57,7 @@ package body SH1107 is
    begin
       case This.Connection is
          when Connect_I2C =>
-            SH1107.I2C.Write_Data (This.Port, This.Address, Data);
+            SH1107.I2C.Write_Data (This.Port_I2C, This.Address_I2C, Data);
          when Connect_SPI =>
             null;
       end case;
@@ -95,8 +95,42 @@ package body SH1107 is
 
       This.Orientation := Orientation;
       This.Connection := Connect_I2C;
-      This.Port := Port;
-      This.Address := Address;
+      This.Port_I2C := Port;
+      This.Address_I2C := Address;
+
+      Write_Command (This, CMD_DISPLAY_OFF);
+      Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
+      Write_Command (This, CMD_SET_DISPLAY_OFFSET);
+      Write_Command (This, 16#00#);
+      Write_Command (This, CMD_SEGMENT_REMAP_DOWN);
+      Write_Command (This, CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT);
+      Write_Command (This, CMD_SET_CONTRAST);
+      Write_Command (This, CMD_DISPLAY_ON);
+      Write_Command (This, CMD_NORMAL_DISPLAY);
+      Write_Command (This, CMD_SET_DISPLAY_START_LINE);
+      Write_Command (This, 16#00#);
+      Write_Command (This, CMD_DISPLAY_ON);
+
+      This.Device_Initialized := True;
+   end Initialize;
+
+   procedure Initialize (This        : in out SH1107_Screen;
+                         Orientation : SH1107_Orientation;
+                         Port        : HAL.SPI.Any_SPI_Port;
+                         CS          : HAL.GPIO.Any_GPIO_Point;
+                         SCK         : HAL.GPIO.Any_GPIO_Point;
+                         MOSI        : HAL.GPIO.Any_GPIO_Point) is
+   begin
+      if This.Width * This.Height /= (This.Buffer_Size_In_Byte * 8) then
+         raise Program_Error with "Invalid screen parameters";
+      end if;
+
+      This.Orientation := Orientation;
+      This.Connection := Connect_SPI;
+      This.Port_SPI := Port;
+      This.CS_SPI := CS;
+      This.SCK_SPI := SCK;
+      This.MOSI_SPI := MOSI;
 
       Write_Command (This, CMD_DISPLAY_OFF);
       Write_Command (This, CMD_PAGE_ADDRESSING_MODE);

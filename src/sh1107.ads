@@ -12,7 +12,9 @@
 with HAL;
 with HAL.Bitmap;
 with HAL.Framebuffer;
+with HAL.GPIO;
 with HAL.I2C;
+with HAL.SPI;
 
 with Memory_Mapped_Bitmap;
 
@@ -43,6 +45,15 @@ package SH1107 is
                          Orientation : SH1107_Orientation;
                          Port        : not null HAL.I2C.Any_I2C_Port;
                          Address     : HAL.I2C.I2C_Address);
+
+   --------------------------------------------------------------------------
+   --  Initializes an OLED screen connected by SPI
+   procedure Initialize (This        : in out SH1107_Screen;
+                         Orientation : SH1107_Orientation;
+                         Port        : HAL.SPI.Any_SPI_Port;
+                         CS          : HAL.GPIO.Any_GPIO_Point;
+                         SCK         : HAL.GPIO.Any_GPIO_Point;
+                         MOSI        : HAL.GPIO.Any_GPIO_Point);
 
    --------------------------------------------------------------------------
    --  Turns on the display
@@ -166,9 +177,13 @@ private
          Device_Initialized : Boolean := False;
          Connection         : Connector;
          --  In case of I2C:
-         Port               : HAL.I2C.Any_I2C_Port;
-         Address            : HAL.I2C.I2C_Address;
+         Port_I2C           : HAL.I2C.Any_I2C_Port;
+         Address_I2C        : HAL.I2C.I2C_Address;
          --  in case of SPI:
+         Port_SPI           : HAL.SPI.Any_SPI_Port;
+         CS_SPI             : HAL.GPIO.Any_GPIO_Point;
+         SCK_SPI            : HAL.GPIO.Any_GPIO_Point;
+         MOSI_SPI           : HAL.GPIO.Any_GPIO_Point;
       end record;
 
    --========================================================================
