@@ -30,14 +30,38 @@ package SH1107 is
    --     Left = The display is pointing LEFT relative to the cable
    type SH1107_Orientation is (Up, Right, Down, Left);
 
-   type SH1107_Screen
-     (Buffer_Size_In_Byte : Positive;
-      Width               : Positive;  --  Width in pixel
-      Height              : Positive   --  Height in pixel
-      )
+   --------------------------------------------------------------------------
+   --  As this screen is blakc/white only, we only have one layer
+   THE_LAYER : constant Positive := 1;
+
+   --------------------------------------------------------------------------
+   --  This driver can only support 128 x 128 bits black/white
+   --  Therefore we daclare those constants here
+   THE_WIDTH  : constant Positive := 128;
+   THE_HEIGHT : constant Positive := 128;
+
+   --------------------------------------------------------------------------
+   --  Having the constants as above, and as one byte has 8 bits,
+   --  The buffer size is a constant as below
+   THE_BUFFER_SIZE_IN_BYTES : constant Positive
+     := (THE_WIDTH * THE_HEIGHT) / 8;
+
+   --------------------------------------------------------------------------
+   --  The device can be connected via
+   --  - I2C
+   --  - SPI
+   type Connector is (Connect_I2C, Connect_SPI);
+
+   --------------------------------------------------------------------------
+   --  Our screen type definition.
+   --  Unlike other drivers, as this driver is constant, no discriminants
+   --  needed for different scenarions.
+   type SH1107_Screen (Connect_With : Connector)
    is limited new HAL.Framebuffer.Frame_Buffer_Display with private;
 
-   type Any_SH1107_Screen is access all SH1107_Screen'Class;
+   --------------------------------------------------------------------------
+   --  Our access screen type definition.
+   type Any_SH1107_Screen is not null access all SH1107_Screen'Class;
 
    --------------------------------------------------------------------------
    --  Initializes an OLED screen connected by I2C
@@ -50,10 +74,8 @@ package SH1107 is
    --  Initializes an OLED screen connected by SPI
    procedure Initialize (This        : in out SH1107_Screen;
                          Orientation : SH1107_Orientation;
-                         Port        : HAL.SPI.Any_SPI_Port;
-                         CS          : HAL.GPIO.Any_GPIO_Point;
-                         SCK         : HAL.GPIO.Any_GPIO_Point;
-                         MOSI        : HAL.GPIO.Any_GPIO_Point);
+                         Port        : not null HAL.SPI.Any_SPI_Port;
+                         CS_SPI      : not null HAL.GPIO.Any_GPIO_Point);
 
    --------------------------------------------------------------------------
    --  Turns on the display
@@ -100,11 +122,11 @@ package SH1107 is
 
    overriding
    function Width
-     (This : SH1107_Screen) return Positive is (This.Width);
+     (This : SH1107_Screen) return Positive is (THE_WIDTH);
 
    overriding
    function Height
-     (This : SH1107_Screen) return Positive is (This.Height);
+     (This : SH1107_Screen) return Positive is (THE_HEIGHT);
 
    overriding
    function Swapped
@@ -139,51 +161,50 @@ package SH1107 is
    procedure Update_Layers
      (This : in out SH1107_Screen);
 
+   pragma Warnings (Off, "formal parameter ""Layer"" is not referenced");
    overriding
    function Color_Mode
      (This  : SH1107_Screen;
-      Layer : Positive) return HAL.Framebuffer.FB_Color_Mode;
+      Layer : Positive := THE_LAYER) return HAL.Framebuffer.FB_Color_Mode
+   is (HAL.Bitmap.M_1);
+   pragma Warnings (On, "formal parameter ""Layer"" is not referenced");
 
    overriding
    function Hidden_Buffer
      (This  : in out SH1107_Screen;
-      Layer : Positive)
+      Layer : Positive := THE_LAYER)
       return not null HAL.Bitmap.Any_Bitmap_Buffer;
 
    overriding
    function Pixel_Size
      (Display : SH1107_Screen;
-      Layer   : Positive) return Positive;
+      Layer   : Positive := THE_LAYER) return Positive;
 
 private
-   type Connector is (Connect_I2C, Connect_SPI);
-
-   type SH1107_Bitmap_Buffer (Buffer_Size_In_Byte : Positive) is
+   type SH1107_Bitmap_Buffer is
      new Memory_Mapped_Bitmap.Memory_Mapped_Bitmap_Buffer with record
       Orientation : SH1107_Orientation;
-      Data        : HAL.UInt8_Array (1 .. Buffer_Size_In_Byte);
+      Data        : HAL.UInt8_Array (1 .. THE_BUFFER_SIZE_IN_BYTES);
    end record;
 
-   type SH1107_Screen (Buffer_Size_In_Byte : Positive;
-                       Width               : Positive;
-                       Height              : Positive
-                      )
+   type SH1107_Screen  (Connect_With : Connector)
    is limited new HAL.Framebuffer.Frame_Buffer_Display with
       record
-         Orientation        : SH1107_Orientation;
-         Memory_Layer       : aliased
-           SH1107_Bitmap_Buffer (Buffer_Size_In_Byte);
-         Layer_Initialized  : Boolean := False;
-         Device_Initialized : Boolean := False;
-         Connection         : Connector;
-         --  In case of I2C:
-         Port_I2C           : HAL.I2C.Any_I2C_Port;
-         Address_I2C        : HAL.I2C.I2C_Address;
-         --  in case of SPI:
-         Port_SPI           : HAL.SPI.Any_SPI_Port;
-         CS_SPI             : HAL.GPIO.Any_GPIO_Point;
-         SCK_SPI            : HAL.GPIO.Any_GPIO_Point;
-         MOSI_SPI           : HAL.GPIO.Any_GPIO_Point;
+         Buffer_Size_In_Byte : Positive := THE_BUFFER_SIZE_IN_BYTES;
+         Width               : Positive := THE_WIDTH;
+         Height              : Positive := THE_HEIGHT;
+         Orientation         : SH1107_Orientation;
+         Memory_Layer        : aliased SH1107_Bitmap_Buffer;
+         Layer_Initialized   : Boolean := False;
+         Device_Initialized  : Boolean := False;
+         case Connect_With is
+            when Connect_I2C =>
+               Port_I2C            : HAL.I2C.Any_I2C_Port;
+               Address_I2C         : HAL.I2C.I2C_Address;
+            when Connect_SPI =>
+               Port_SPI            : HAL.SPI.Any_SPI_Port;
+               CS_SPI              : HAL.GPIO.Any_GPIO_Point;
+         end case;
       end record;
 
    --========================================================================

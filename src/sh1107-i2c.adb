@@ -10,6 +10,8 @@
 --
 package body SH1107.I2C is
 
+   --------------------------------------------------------------------------
+   --  see .ads
    procedure Write_Command (Port    : not null HAL.I2C.Any_I2C_Port;
                             Address : HAL.I2C.I2C_Address;
                             Cmd     : HAL.UInt8) is
@@ -23,10 +25,12 @@ package body SH1107.I2C is
                             Status  => Status);
       if Status /= HAL.I2C.Ok then
          --  No error handling...
-         raise Program_Error;
+         raise Program_Error with "I2C: Transmit command failed";
       end if;
    end Write_Command;
 
+   --------------------------------------------------------------------------
+   --  see .ads
    procedure Write_Data (Port    : not null HAL.I2C.Any_I2C_Port;
                          Address : HAL.I2C.I2C_Address;
                          Data    : HAL.UInt8_Array) is
@@ -40,7 +44,7 @@ package body SH1107.I2C is
                             Status  => Status);
       if Status /= HAL.I2C.Ok then
          --  No error handling...
-         raise Program_Error;
+         raise Program_Error with "I2C: Transmit data failed";
       end if;
    end Write_Data;
 

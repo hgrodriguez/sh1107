@@ -11,23 +11,27 @@
 --
 
 with HAL;
-with HAL.GPIO;
 with HAL.Bitmap;
 with HAL.Framebuffer;
+with HAL.GPIO;
+with HAL.SPI;
 
 with RP.Clock;
 with RP.Device;
-with RP.I2C_Master;
 with RP.GPIO;
+with RP.I2C_Master;
+with RP.SPI;
 with RP.Timer;
 
 with Pico;
 
 with SH1107;
 
+with Demos;
+
 procedure Example_Pico is
 
-   ORENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Up;
+   ORIENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Up;
 
    type Demos_Available is (Show_All,
                             Black_Background_White_Arrow,
@@ -46,268 +50,10 @@ procedure Example_Pico is
 
    My_Color_Mode : HAL.Framebuffer.FB_Color_Mode;
 
-   My_I2C : RP.I2C_Master.I2C_Master_Port renames RP.Device.I2C_0;
-
-   Another_Timer    : RP.Timer.Delays;
-   Initialize_Timer : aliased RP.Timer.Delays;
+   Initialize_Timer  : aliased RP.Timer.Delays;
    My_Timer          : RP.Timer.Delays;
 
-   My_Hidden_Buffer : HAL.Bitmap.Any_Bitmap_Buffer;
-
-   THE_WIDTH                : constant Positive := 128;
-   THE_HEIGHT               : constant Positive := 128;
-   THE_BUFFER_SIZE_IN_BYTES : constant Positive
-     := (THE_WIDTH * THE_HEIGHT) / 8;
    THE_LAYER                : constant Positive := 1;
-
-   My_SH1107_Screen  : SH1107.SH1107_Screen (THE_BUFFER_SIZE_IN_BYTES,
-                                             THE_WIDTH,
-                                             THE_HEIGHT);
-   Corner_0_0        : constant HAL.Bitmap.Point := (0, 0);
-   Corner_1_1        : constant HAL.Bitmap.Point := (1, 1);
-   Corner_0_127      : constant HAL.Bitmap.Point := (0, THE_HEIGHT - 1);
-   Corner_127_0      : constant HAL.Bitmap.Point := (THE_WIDTH - 1, 0);
-   Corner_127_127    : constant HAL.Bitmap.Point := (THE_WIDTH - 1,
-                                                     THE_HEIGHT - 1);
-   My_Area           : constant HAL.Bitmap.Rect := (Position => Corner_0_0,
-                                                    Width => THE_WIDTH - 1,
-                                                    Height => THE_HEIGHT - 1);
-
-   procedure Initialize_Device;
-   procedure Initialize_I2C_0;
-   procedure Use_SH1107;
-   procedure P_White_Background_With_Black_Rectangle_Full_Screen;
-   procedure P_Black_Background_With_White_Rectangle_Full_Screen;
-   procedure P_White_Background_4_Black_Corners;
-   procedure P_Black_Background_4_White_Corners;
-
-   procedure P_Black_Background_White_Geometry;
-   procedure P_White_Background_Black_Geometry;
-
-   procedure P_White_Diagonal_Line_On_Black;
-   procedure P_Black_Diagonal_Line_On_White;
-
-   procedure P_Black_Background_White_Arrow is
-      Corners : constant HAL.Bitmap.Point_Array (1 .. 7)
-        := (
-            1 => (40, 118),
-            2 => (86, 118),
-            3 => (86, 60),
-            4 => (96, 60),
-            5 => (63, 10),
-            6 => (30, 60),
-            7 => (40, 60));
-      Start   : HAL.Bitmap.Point;
-      Stop    : HAL.Bitmap.Point;
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-
-      My_Hidden_Buffer.Set_Source (Native => 1);
-
-      for N in Corners'First .. Corners'Last loop
-         Start := Corners (N);
-         if N = Corners'Last then
-            Stop := Corners (1);
-         else
-            Stop := Corners (N + 1);
-         end if;
-         My_Hidden_Buffer.Draw_Line (Start, Stop);
-      end loop;
-
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_Black_Background_White_Arrow;
-
-   procedure P_White_Background_With_Black_Rectangle_Full_Screen is
-   begin
-      --  White_Background_With_Black_Rectangle_Full_Screen
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Draw_Rect (Area      => My_Area);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_White_Background_With_Black_Rectangle_Full_Screen;
-
-   procedure P_Black_Background_With_White_Rectangle_Full_Screen is
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Draw_Rect (Area      => My_Area);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_Black_Background_With_White_Rectangle_Full_Screen;
-
-   procedure P_White_Background_4_Black_Corners is
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_0_0,
-                                  Native => 0);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_1_1,
-                                  Native => 0);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_0_127,
-                                  Native => 0);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_127_0,
-                                  Native => 0);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_127_127,
-                                  Native => 0);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_White_Background_4_Black_Corners;
-
-   procedure P_Black_Background_4_White_Corners is
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_0_0,
-                                  Native => 1);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_0_127,
-                                  Native => 1);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_127_0,
-                                  Native => 1);
-      My_Hidden_Buffer.Set_Pixel (Pt     => Corner_127_127,
-                                  Native => 1);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_Black_Background_4_White_Corners;
-
-   My_Circle_Center : constant HAL.Bitmap.Point := (X => 64, Y => 38);
-   My_Circle_Radius : constant Natural := 10;
-   My_Rectangle : constant HAL.Bitmap.Rect := (Position => (X => 38, Y => 78),
-                                      Width => 20,
-                                      Height => 10);
-
-   procedure P_Black_Background_White_Geometry is
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Draw_Circle (Center => My_Circle_Center,
-                                    Radius => My_Circle_Radius);
-      My_Hidden_Buffer.Draw_Rounded_Rect (Area      => My_Rectangle,
-                                          Radius    => 4);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_Black_Background_White_Geometry;
-
-   procedure P_White_Background_Black_Geometry is
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Draw_Circle (Center => My_Circle_Center,
-                                    Radius => My_Circle_Radius);
-      My_Hidden_Buffer.Draw_Rounded_Rect (Area      => My_Rectangle,
-                                          Radius    => 4);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_White_Background_Black_Geometry;
-
-   procedure P_White_Diagonal_Line_On_Black is
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Draw_Line (Start     => Corner_0_0,
-                                  Stop      => Corner_127_127);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_White_Diagonal_Line_On_Black;
-
-   procedure P_Black_Diagonal_Line_On_White is
-   begin
-      My_Hidden_Buffer.Set_Source (Native => 1);
-      My_Hidden_Buffer.Fill;
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-
-      My_Hidden_Buffer.Set_Source (Native => 0);
-      My_Hidden_Buffer.Draw_Line (Start     => Corner_0_0,
-                                  Stop      => Corner_127_127);
-      SH1107.Update_Layer (This      => My_SH1107_Screen,
-                           Layer     => THE_LAYER);
-      RP.Timer.Delay_Seconds (This => Another_Timer,
-                              S    => 1);
-   end P_Black_Diagonal_Line_On_White;
 
    procedure Initialize_Device is
    begin
@@ -319,10 +65,10 @@ procedure Example_Pico is
       RP.GPIO.Enable;
       Pico.LED.Configure (RP.GPIO.Output);
 
-      RP.Timer.Enable (This => Another_Timer);
-
       RP.Timer.Enable (This => Initialize_Timer);
    end Initialize_Device;
+
+   My_I2C : RP.I2C_Master.I2C_Master_Port renames RP.Device.I2C_0;
 
    procedure Initialize_I2C_0 is
       SDA     : RP.GPIO.GPIO_Point renames Pico.GP0;
@@ -333,71 +79,137 @@ procedure Example_Pico is
       My_I2C.Enable (100_000);
    end Initialize_I2C_0;
 
-   procedure Use_SH1107 is
+   My_Screen_I2C : SH1107.SH1107_Screen (Connect_With => SH1107.Connect_I2C);
+
+   My_SPI : RP.SPI.SPI_Port renames RP.Device.SPI_0;
+   My_CS_SPI : RP.GPIO.GPIO_Point renames Pico.GP15;
+
+   procedure Initialize_SPI_0 is
+      SCK    : RP.GPIO.GPIO_Point renames Pico.GP2;
+      MOSI   : RP.GPIO.GPIO_Point renames Pico.GP3;
+      MISO   : RP.GPIO.GPIO_Point renames Pico.GP4;
+      CS     : RP.GPIO.GPIO_Point renames Pico.GP5;
+      CONFIG : constant RP.SPI.SPI_Configuration
+        := (Role      => RP.SPI.Master,
+            Baud      => 10_000_000,
+            Data_Size => HAL.SPI.Data_Size_8b,
+            Polarity  => RP.SPI.Active_Low,
+            Phase     => RP.SPI.Falling_Edge,
+            Blocking  => True);
+
    begin
-      SH1107.Initialize (This    => My_SH1107_Screen,
-                         Orientation => ORENTIATION_SELECTED,
-                         Port    => My_I2C'Access,
-                         Address => 16#3C#);
-      if not SH1107.Initialized (This => My_SH1107_Screen) then
-         Pico.LED.Clear;
-      end if;
+      SCK.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up, RP.GPIO.SPI);
+      MOSI.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up, RP.GPIO.SPI);
+      CS.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up, RP.GPIO.SPI);
 
-      My_Color_Mode := SH1107.Color_Mode (This  => My_SH1107_Screen,
-                                          Layer => THE_LAYER);
+      MISO.Configure (RP.GPIO.Input, RP.GPIO.Pull_Up, RP.GPIO.SPI);
 
-      SH1107.Initialize_Layer (This   => My_SH1107_Screen,
+      My_CS_SPI.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up);
+
+      My_SPI.Configure (CONFIG);
+   end Initialize_SPI_0;
+
+   My_Screen_SPI : SH1107.SH1107_Screen (Connect_With => SH1107.Connect_SPI);
+
+   procedure Show_Demo_With (S : in out SH1107.SH1107_Screen) is
+   begin
+      My_Color_Mode := SH1107.Color_Mode (This  => S);
+
+      SH1107.Initialize_Layer (This   => S,
                                Layer  => THE_LAYER,
                                Mode   => My_Color_Mode);
 
-      My_Hidden_Buffer := SH1107.Hidden_Buffer (This  => My_SH1107_Screen,
-                                                Layer => THE_LAYER);
+      for O in SH1107.SH1107_Orientation'First
+        ..
+          SH1107.SH1107_Orientation'Last loop
+         S.Set_Orientation (O);
 
-      loop
-         for O in SH1107.SH1107_Orientation'First
-           ..
-             SH1107.SH1107_Orientation'Last loop
-            My_SH1107_Screen.Set_Orientation (O);
-
-            case DEMO_SELECTED is
+         case DEMO_SELECTED is
             when Show_All =>
-               P_Black_Background_White_Arrow;
-               P_White_Background_With_Black_Rectangle_Full_Screen;
-               P_Black_Background_With_White_Rectangle_Full_Screen;
-               P_White_Background_4_Black_Corners;
-               P_Black_Background_4_White_Corners;
-               P_Black_Background_White_Geometry;
-               P_White_Background_Black_Geometry;
-               P_White_Diagonal_Line_On_Black;
-               P_Black_Diagonal_Line_On_White;
+               Demos.Black_Background_White_Arrow (S);
+               Demos.White_Background_With_Black_Rectangle_Full_Screen
+                 (S);
+               Demos.Black_Background_With_White_Rectangle_Full_Screen
+                 (S);
+               Demos.White_Background_4_Black_Corners
+                 (S);
+
+               Demos.Black_Background_4_White_Corners
+                 (S);
+
+               Demos.Black_Background_White_Geometry
+                 (S);
+
+               Demos.White_Background_Black_Geometry
+                 (S);
+
+               Demos.White_Diagonal_Line_On_Black
+                 (S);
+
+               Demos.Black_Diagonal_Line_On_White
+                 (S);
+
             when White_Background_With_Black_Rectangle_Full_Screen =>
-               P_White_Background_With_Black_Rectangle_Full_Screen;
+               Demos.White_Background_With_Black_Rectangle_Full_Screen
+                 (S);
             when Black_Background_With_White_Rectangle_Full_Screen =>
-               P_Black_Background_With_White_Rectangle_Full_Screen;
+               Demos.Black_Background_With_White_Rectangle_Full_Screen
+                 (S);
             when White_Background_4_Black_Corners =>
-               P_White_Background_4_Black_Corners;
+               Demos.White_Background_4_Black_Corners
+                 (S);
+
             when Black_Background_4_White_Corners =>
-               P_Black_Background_4_White_Corners;
+               Demos.Black_Background_4_White_Corners
+                 (S);
+
             when Black_Background_White_Geometry =>
-               P_Black_Background_White_Geometry;
+               Demos.Black_Background_White_Geometry
+                 (S);
+
             when White_Background_Black_Geometry =>
-               P_White_Background_Black_Geometry;
+               Demos.White_Background_Black_Geometry
+                 (S);
+
             when White_Diagonal_Line_On_Black =>
-               P_White_Diagonal_Line_On_Black;
+               Demos.White_Diagonal_Line_On_Black
+                 (S);
+
             when Black_Diagonal_Line_On_White =>
-               P_Black_Diagonal_Line_On_White;
+               Demos.Black_Diagonal_Line_On_White
+                 (S);
+
             when Black_Background_White_Arrow =>
-               P_Black_Background_White_Arrow;
-            end case;
-         end loop;
+               Demos.Black_Background_White_Arrow (S);
+         end case;
       end loop;
-   end Use_SH1107;
+   end Show_Demo_With;
 
 begin
    Initialize_Device;
    Pico.LED.Set;
-   Initialize_I2C_0;
 
-   Use_SH1107;
+   Initialize_I2C_0;
+   SH1107.Initialize (This    => My_Screen_I2C,
+                      Orientation => ORIENTIATION_SELECTED,
+                      Port    => My_I2C'Access,
+                      Address => 16#3C#);
+   if not SH1107.Initialized (This => My_Screen_I2C) then
+      Pico.LED.Clear;
+   end if;
+
+   Initialize_SPI_0;
+   SH1107.Initialize (This    => My_Screen_SPI,
+                      Orientation => ORIENTIATION_SELECTED,
+                      Port    => My_SPI'Access,
+                      CS_SPI => My_CS_SPI'Access);
+   if not SH1107.Initialized (This => My_Screen_SPI) then
+      Pico.LED.Clear;
+   end if;
+
+   loop
+      Show_Demo_With (My_Screen_I2C);
+      Show_Demo_With (My_Screen_SPI);
+   end loop;
 
 end Example_Pico;

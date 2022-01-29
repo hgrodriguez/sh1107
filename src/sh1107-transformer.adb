@@ -11,6 +11,10 @@
 
 package body SH1107.Transformer is
 
+   --------------------------------------------------------------------------
+   --  This driver has 128 columns
+   COLUMN_SIZE : constant Natural := 128;
+
    --========================================================================
    --
    --  This section is the implementation of the get byte index calculation
@@ -33,13 +37,13 @@ package body SH1107.Transformer is
    begin
       case O is
          when Up =>
-            return 128 * Get_Page_Up (Y) + Get_Column_Up (X);
+            return COLUMN_SIZE * Get_Page_Up (Y) + Get_Column_Up (X);
          when Right =>
-            return 128 * Get_Page_Right (X) + Get_Column_Right (Y);
+            return COLUMN_SIZE * Get_Page_Right (X) + Get_Column_Right (Y);
          when Down =>
-            return 128 * Get_Page_Down (Y) + Get_Column_Down (X);
+            return COLUMN_SIZE * Get_Page_Down (Y) + Get_Column_Down (X);
          when Left =>
-            return 128 * Get_Page_Left (X) + Get_Column_Left (Y);
+            return COLUMN_SIZE * Get_Page_Left (X) + Get_Column_Left (Y);
       end case;
    end Get_Byte_Index;
 
@@ -103,7 +107,7 @@ package body SH1107.Transformer is
    --  increasing x coordinates are mapped to decreasing columns
    function Get_Column_Down (X : Natural) return Natural is
    begin
-      return 127 - X;
+      return SH1107.THE_WIDTH - 1 - X;
    end Get_Column_Down;
 
    --------------------------------------------------------------------------
@@ -112,7 +116,7 @@ package body SH1107.Transformer is
    --  increasing Y coordinates are mapped to decreasing columns
    function Get_Column_Left (Y : Natural) return Natural is
    begin
-      return 127 - Y;
+      return SH1107.THE_HEIGHT - 1 - Y;
    end Get_Column_Left;
 
    --========================================================================
