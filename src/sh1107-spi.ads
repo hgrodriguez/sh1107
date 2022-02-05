@@ -1,6 +1,7 @@
 --===========================================================================
 --
---  This package is the interface to the I2C connection implementation
+--  This package is the interface to the SPI connection implementation
+--  THIS IS NOT IMPLEMENTED YET, IT IS WIP!!!
 --
 --===========================================================================
 --

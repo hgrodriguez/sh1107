@@ -4,7 +4,7 @@
 --
 --===========================================================================
 --
---  Copyright 2021 (C) Holger Rodriguez
+--  Copyright 2022 (C) Holger Rodriguez
 --
 --  SPDX-License-Identifier: BSD-3-Clause
 --
@@ -38,6 +38,7 @@ package body SH1107 is
 
    --------------------------------------------------------------------------
    --  Package internal rocedures to write to the device
+   --  Implementation at the end of the file.
    --------------------------------------------------------------------------
    --------------------------------------------------------------------------
    --  Writes the
@@ -45,14 +46,12 @@ package body SH1107 is
    --    This : Screen
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8);
-
    --------------------------------------------------------------------------
    --  Writes the
    --    Data : to
    --    This : Screen
    procedure Write_Data (This : SH1107_Screen;
                          Data : HAL.UInt8_Array);
-
    --------------------------------------------------------------------------
    --  Writes
    --    Data : as raw pixels to

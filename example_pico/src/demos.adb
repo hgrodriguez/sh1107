@@ -1,3 +1,14 @@
+--===========================================================================
+--
+--  This package is the implementation of the demo package showing examples
+--  for the SH1107 OLED controller
+--
+--===========================================================================
+--
+--  Copyright 2022 (C) Holger Rodriguez
+--
+--  SPDX-License-Identifier: BSD-3-Clause
+--
 with HAL;
 with HAL.Bitmap;
 

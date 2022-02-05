@@ -5,7 +5,7 @@
 --
 --===========================================================================
 --
---  Copyright 2021 (C) Holger Rodriguez
+--  Copyright 2022 (C) Holger Rodriguez
 --
 --  SPDX-License-Identifier: BSD-3-Clause
 --
@@ -46,7 +46,7 @@ procedure Example_Pico is
                            );
 
    DEMO_SELECTED : constant Demos_Available
-     := Black_Background_White_Arrow;
+     := Show_All;
 
    My_Color_Mode : HAL.Framebuffer.FB_Color_Mode;
 

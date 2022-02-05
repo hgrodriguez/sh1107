@@ -4,7 +4,7 @@
 --
 --===========================================================================
 --
---  Copyright 2021 (C) Holger Rodriguez
+--  Copyright 2022 (C) Holger Rodriguez
 --
 --  SPDX-License-Identifier: BSD-3-Clause
 --
@@ -31,7 +31,7 @@ package SH1107 is
    type SH1107_Orientation is (Up, Right, Down, Left);
 
    --------------------------------------------------------------------------
-   --  As this screen is blakc/white only, we only have one layer
+   --  As this screen is black/white only, we only have one layer
    THE_LAYER : constant Positive := 1;
 
    --------------------------------------------------------------------------
@@ -56,6 +56,7 @@ package SH1107 is
    --  Our screen type definition.
    --  Unlike other drivers, as this driver is constant, no discriminants
    --  needed for different scenarions.
+   --    Connect_With : defines, how to connect to the display
    type SH1107_Screen (Connect_With : Connector)
    is limited new HAL.Framebuffer.Frame_Buffer_Display with private;
 
@@ -181,6 +182,8 @@ package SH1107 is
       Layer   : Positive := THE_LAYER) return Positive;
 
 private
+   --------------------------------------------------------------------------
+   --  The bitmap buffer used for the display
    type SH1107_Bitmap_Buffer is
      new Memory_Mapped_Bitmap.Memory_Mapped_Bitmap_Buffer with record
       Orientation : SH1107_Orientation;

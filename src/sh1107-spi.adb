@@ -1,3 +1,14 @@
+--===========================================================================
+--
+--  This package is the implementation of the SPI connection implementation
+--  THIS IS NOT IMPLEMENTED YET, IT IS WIP!!!
+--
+--===========================================================================
+--
+--  Copyright 2022 (C) Holger Rodriguez
+--
+--  SPDX-License-Identifier: BSD-3-Clause
+--
 package body SH1107.SPI is
 
    --------------------------------------------------------------------------

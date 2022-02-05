@@ -5,8 +5,13 @@ Driver implementation for the SH1107 driver used by OLED displays
 1. I2C - Implemented
 2. SPI - Planned to implement
 
+## TO DO:
+1. use the newest pico_bsp/rp2040_hal libraries
+2. implement SPI
+
 ## Versioning scheme
 Major.Minor.Patch
+
 ### Major
 1 = I2C; Status: **Implemented**
 

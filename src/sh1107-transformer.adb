@@ -4,7 +4,7 @@
 --
 --===========================================================================
 --
---  Copyright 2021 (C) Holger Rodriguez
+--  Copyright 2022 (C) Holger Rodriguez
 --
 --  SPDX-License-Identifier: BSD-3-Clause
 --
@@ -14,6 +14,9 @@ package body SH1107.Transformer is
    --------------------------------------------------------------------------
    --  This driver has 128 columns
    COLUMN_SIZE : constant Natural := 128;
+   --------------------------------------------------------------------------
+   --  This driver has 16 pages
+   PAGE_SIZE   : constant Natural := 16;
 
    --========================================================================
    --
@@ -62,7 +65,7 @@ package body SH1107.Transformer is
    --  increasing X coordinates are mapped to decreasing pages
    function Get_Page_Right (X : Natural) return Natural is
    begin
-      return 15 - X / 8;
+      return PAGE_SIZE - 1 - X / 8;
    end Get_Page_Right;
 
    --------------------------------------------------------------------------
@@ -71,7 +74,7 @@ package body SH1107.Transformer is
    --  increasing Y coordinates are mapped to decreasing pages
    function Get_Page_Down (Y : Natural) return Natural is
    begin
-      return 15 - Y / 8;
+      return PAGE_SIZE - 1 - Y / 8;
    end Get_Page_Down;
 
    --------------------------------------------------------------------------
