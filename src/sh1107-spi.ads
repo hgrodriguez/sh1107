@@ -21,7 +21,8 @@ package SH1107.SPI is
    --     CS_SPI : as the select pin
    procedure Write_Command (Port   : not null HAL.SPI.Any_SPI_Port;
                             CS_SPI : not null HAL.GPIO.Any_GPIO_Point;
-                            Cmd    : HAL.UInt8);
+                            DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
+                            Cmd         : HAL.UInt8);
 
    --------------------------------------------------------------------------
    --  Writes the
@@ -30,6 +31,7 @@ package SH1107.SPI is
    --     CS_SPI : as the select pin
    procedure Write_Data (Port   : not null HAL.SPI.Any_SPI_Port;
                          CS_SPI : not null HAL.GPIO.Any_GPIO_Point;
-                         Data   : HAL.SPI.SPI_Data_8b);
+                         DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
+                         Data        : HAL.SPI.SPI_Data_8b);
 
 end SH1107.SPI;

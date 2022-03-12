@@ -76,7 +76,8 @@ package SH1107 is
    procedure Initialize (This        : in out SH1107_Screen;
                          Orientation : SH1107_Orientation;
                          Port        : not null HAL.SPI.Any_SPI_Port;
-                         CS_SPI      : not null HAL.GPIO.Any_GPIO_Point);
+                         CS_SPI      : not null HAL.GPIO.Any_GPIO_Point;
+                         DC_SPI      : not null HAL.GPIO.Any_GPIO_Point);
 
    --------------------------------------------------------------------------
    --  Turns on the display
@@ -207,6 +208,7 @@ private
             when Connect_SPI =>
                Port_SPI            : HAL.SPI.Any_SPI_Port;
                CS_SPI              : HAL.GPIO.Any_GPIO_Point;
+               DC_SPI              : HAL.GPIO.Any_GPIO_Point;
          end case;
       end record;
 

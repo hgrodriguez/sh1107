@@ -59,6 +59,22 @@ package body SH1107 is
    procedure Write_Raw_Pixels (This : SH1107_Screen;
                                Data : HAL.UInt8_Array);
 
+   procedure Initialize_Screen (This        : in out SH1107_Screen) is
+   begin
+      Write_Command (This, CMD_DISPLAY_OFF);
+      Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
+      Write_Command (This, CMD_SET_DISPLAY_OFFSET);
+      Write_Command (This, 16#00#);
+      Write_Command (This, CMD_SEGMENT_REMAP_DOWN);
+      Write_Command (This, CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT);
+      Write_Command (This, CMD_SET_CONTRAST);
+      Write_Command (This, CMD_DISPLAY_ON);
+      Write_Command (This, CMD_NORMAL_DISPLAY);
+      Write_Command (This, CMD_SET_DISPLAY_START_LINE);
+      Write_Command (This, 16#00#);
+      Write_Command (This, CMD_DISPLAY_ON);
+   end Initialize_Screen;
+
    --------------------------------------------------------------------------
    --  see .ads
    procedure Initialize (This        : in out SH1107_Screen;
@@ -74,18 +90,7 @@ package body SH1107 is
       This.Port_I2C := Port;
       This.Address_I2C := Address;
 
-      Write_Command (This, CMD_DISPLAY_OFF);
-      Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
-      Write_Command (This, CMD_SET_DISPLAY_OFFSET);
-      Write_Command (This, 16#00#);
-      Write_Command (This, CMD_SEGMENT_REMAP_DOWN);
-      Write_Command (This, CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT);
-      Write_Command (This, CMD_SET_CONTRAST);
-      Write_Command (This, CMD_DISPLAY_ON);
-      Write_Command (This, CMD_NORMAL_DISPLAY);
-      Write_Command (This, CMD_SET_DISPLAY_START_LINE);
-      Write_Command (This, 16#00#);
-      Write_Command (This, CMD_DISPLAY_ON);
+      Initialize_Screen (This);
 
       This.Device_Initialized := True;
    end Initialize;
@@ -95,7 +100,8 @@ package body SH1107 is
    procedure Initialize (This        : in out SH1107_Screen;
                          Orientation : SH1107_Orientation;
                          Port        : not null HAL.SPI.Any_SPI_Port;
-                         CS_SPI      : not null HAL.GPIO.Any_GPIO_Point) is
+                         CS_SPI      : not null HAL.GPIO.Any_GPIO_Point;
+                         DC_SPI      : not null HAL.GPIO.Any_GPIO_Point) is
    begin
       if This.Connect_With /= Connect_SPI then
          raise Program_Error with "Invalid screen parameters, must be SPI!";
@@ -104,19 +110,9 @@ package body SH1107 is
       This.Orientation := Orientation;
       This.Port_SPI := Port;
       This.CS_SPI := CS_SPI;
+      This.DC_SPI := DC_SPI;
 
-      Write_Command (This, CMD_DISPLAY_OFF);
-      Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
-      Write_Command (This, CMD_SET_DISPLAY_OFFSET);
-      Write_Command (This, 16#00#);
-      Write_Command (This, CMD_SEGMENT_REMAP_DOWN);
-      Write_Command (This, CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT);
-      Write_Command (This, CMD_SET_CONTRAST);
-      Write_Command (This, CMD_DISPLAY_ON);
-      Write_Command (This, CMD_NORMAL_DISPLAY);
-      Write_Command (This, CMD_SET_DISPLAY_START_LINE);
-      Write_Command (This, 16#00#);
-      Write_Command (This, CMD_DISPLAY_ON);
+      Initialize_Screen (This);
 
       This.Device_Initialized := True;
    end Initialize;
@@ -348,7 +344,10 @@ package body SH1107 is
          when Connect_I2C =>
             SH1107.I2C.Write_Command (This.Port_I2C, This.Address_I2C, Cmd);
          when Connect_SPI =>
-            SH1107.SPI.Write_Command (This.Port_SPI, This.CS_SPI, Cmd);
+            SH1107.SPI.Write_Command (This.Port_SPI,
+                                      This.CS_SPI,
+                                      This.DC_SPI,
+                                      Cmd);
       end case;
    end Write_Command;
 
@@ -364,7 +363,10 @@ package body SH1107 is
             for I in Data'First .. Data'Last loop
                SPI_DATA (I) := Data (I);
             end loop;
-            SH1107.SPI.Write_Data (This.Port_SPI, This.CS_SPI, SPI_DATA);
+            SH1107.SPI.Write_Data (This.Port_SPI,
+                                   This.CS_SPI,
+                                   This.DC_SPI,
+                                   SPI_DATA);
       end case;
    end Write_Data;
 

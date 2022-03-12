@@ -13,17 +13,24 @@ with SH1107;
 
 package Demos is
 
-   procedure Black_Background_White_Arrow (S : in out SH1107.SH1107_Screen);
-   procedure White_Background_With_Black_Rectangle_Full_Screen
-     (S : in out SH1107.SH1107_Screen);
-   procedure Black_Background_With_White_Rectangle_Full_Screen
-     (S : in out SH1107.SH1107_Screen);
-   procedure White_Background_4_Black_Corners
-     (S : in out SH1107.SH1107_Screen);
-   procedure Black_Background_4_White_Corners
-     (S : in out SH1107.SH1107_Screen);
-   procedure Black_Background_White_Geometry (S : in out SH1107.SH1107_Screen);
-   procedure White_Background_Black_Geometry (S : in out SH1107.SH1107_Screen);
-   procedure White_Diagonal_Line_On_Black (S : in out SH1107.SH1107_Screen);
-   procedure Black_Diagonal_Line_On_White (S : in out SH1107.SH1107_Screen);
+   type Demos_Available is (Black_Background_White_Arrow,
+                            White_Background_With_Black_Rectangle_Full_Screen,
+                            Black_Background_With_White_Rectangle_Full_Screen,
+                            White_Background_4_Black_Corners,
+                            Black_Background_4_White_Corners,
+                            Black_Background_White_Geometry,
+                            White_Background_Black_Geometry,
+                            White_Diagonal_Line_On_Black,
+                            Black_Diagonal_Line_On_White
+                           );
+
+   type Demo_Array is array (Demos_Available) of Boolean;
+
+   procedure Show_Multiple_Demos (S  : in out SH1107.SH1107_Screen;
+                                  O  : SH1107.SH1107_Orientation;
+                                  DA : Demo_Array);
+
+   procedure Show_1_Demo (S    : in out SH1107.SH1107_Screen;
+                          O    : SH1107.SH1107_Orientation;
+                          Demo : Demos_Available);
 end Demos;

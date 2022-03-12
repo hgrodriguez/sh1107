@@ -11,9 +11,7 @@
 --
 
 with HAL;
-with HAL.Bitmap;
-with HAL.Framebuffer;
-with HAL.GPIO;
+--  with HAL.Framebuffer;
 with HAL.SPI;
 
 with RP.Clock;
@@ -33,27 +31,53 @@ procedure Example_Pico is
 
    ORIENTIATION_SELECTED : constant SH1107.SH1107_Orientation := SH1107.Up;
 
-   type Demos_Available is (Show_All,
-                            Black_Background_White_Arrow,
-                            White_Background_With_Black_Rectangle_Full_Screen,
-                            Black_Background_With_White_Rectangle_Full_Screen,
-                            White_Background_4_Black_Corners,
-                            Black_Background_4_White_Corners,
-                            Black_Background_White_Geometry,
-                            White_Background_Black_Geometry,
-                            White_Diagonal_Line_On_Black,
-                            Black_Diagonal_Line_On_White
-                           );
+   --     Demos_Selectable : constant Demos.Demo_Array
+   --       := (Demos.Black_Background_White_Arrow =>
+   --             (True),
+   --           Demos.White_Background_With_Black_Rectangle_Full_Screen =>
+   --             (False),
+   --           Demos.Black_Background_With_White_Rectangle_Full_Screen =>
+   --             (False),
+   --           Demos.White_Background_4_Black_Corners =>
+   --           (False),
+   --           Demos.Black_Background_4_White_Corners =>
+   --           (False),
+   --           Demos.Black_Background_White_Geometry =>
+   --           (False),
+   --           Demos.White_Background_Black_Geometry =>
+   --           (False),
+   --           Demos.White_Diagonal_Line_On_Black =>
+   --           (False),
+   --           Demos.Black_Diagonal_Line_On_White =>
+   --             (False)
+   --          );
+   --
+   --  My_Color_Mode : HAL.Framebuffer.FB_Color_Mode;
 
-   DEMO_SELECTED : constant Demos_Available
-     := Show_All;
+   --  Trigger button when to act on the screen
+   --  This trigger is generated using a function generator
+   --    providing a square signal with a settable frequency
+   --     Button                : RP.GPIO.GPIO_Point renames Pico.GP16;
+   --     Button_State          : Boolean;
+   --     procedure Wait_For_Trigger_Fired is
+   --     begin
+   --        loop
+   --           Button_State := RP.GPIO.Get (Button);
+   --           exit when Button_State;
+   --        end loop;
+   --     end Wait_For_Trigger_Fired;
+   --     procedure Wait_For_Trigger_Resume is
+   --     begin
+   --        loop
+   --           Button_State := RP.GPIO.Get (Button);
+   --           exit when not Button_State;
+   --        end loop;
+   --     end Wait_For_Trigger_Resume;
 
-   My_Color_Mode : HAL.Framebuffer.FB_Color_Mode;
+   Initialize_Timer      : aliased RP.Timer.Delays;
+   My_Timer              : RP.Timer.Delays;
 
-   Initialize_Timer  : aliased RP.Timer.Delays;
-   My_Timer          : RP.Timer.Delays;
-
-   THE_LAYER                : constant Positive := 1;
+   --   THE_LAYER                : constant Positive := 1;
 
    procedure Initialize_Device is
    begin
@@ -66,6 +90,11 @@ procedure Example_Pico is
       Pico.LED.Configure (RP.GPIO.Output);
 
       RP.Timer.Enable (This => Initialize_Timer);
+      --        --  define a trigger input to enable oscilloscope tracking
+      --        RP.GPIO.Configure (This => Button,
+      --                           Mode => RP.GPIO.Input,
+      --                           Pull => RP.GPIO.Pull_Down,
+      --                           Func => RP.GPIO.SIO);
    end Initialize_Device;
 
    My_I2C : RP.I2C_Master.I2C_Master_Port renames RP.Device.I2C_0;
@@ -81,14 +110,16 @@ procedure Example_Pico is
 
    My_Screen_I2C : SH1107.SH1107_Screen (Connect_With => SH1107.Connect_I2C);
 
-   My_SPI : RP.SPI.SPI_Port renames RP.Device.SPI_0;
-   My_CS_SPI : RP.GPIO.GPIO_Point renames Pico.GP15;
+   My_SPI    : RP.SPI.SPI_Port renames RP.Device.SPI_0;
+   My_CS_SPI : RP.GPIO.GPIO_Point renames Pico.GP5;
+   My_DC_SPI : RP.GPIO.GPIO_Point renames Pico.GP13;
 
    procedure Initialize_SPI_0 is
       SCK    : RP.GPIO.GPIO_Point renames Pico.GP2;
       MOSI   : RP.GPIO.GPIO_Point renames Pico.GP3;
       MISO   : RP.GPIO.GPIO_Point renames Pico.GP4;
-      CS     : RP.GPIO.GPIO_Point renames Pico.GP5;
+      CS     : RP.GPIO.GPIO_Point renames My_CS_SPI;
+      DC     : RP.GPIO.GPIO_Point renames My_DC_SPI;
       CONFIG : constant RP.SPI.SPI_Configuration
         := (Role      => RP.SPI.Master,
             Baud      => 10_000_000,
@@ -104,86 +135,29 @@ procedure Example_Pico is
 
       MISO.Configure (RP.GPIO.Input, RP.GPIO.Pull_Up, RP.GPIO.SPI);
 
-      My_CS_SPI.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up);
+      DC.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up);
 
       My_SPI.Configure (CONFIG);
    end Initialize_SPI_0;
 
    My_Screen_SPI : SH1107.SH1107_Screen (Connect_With => SH1107.Connect_SPI);
 
-   procedure Show_Demo_With (S : in out SH1107.SH1107_Screen) is
-   begin
-      My_Color_Mode := SH1107.Color_Mode (This  => S);
-
-      SH1107.Initialize_Layer (This   => S,
-                               Layer  => THE_LAYER,
-                               Mode   => My_Color_Mode);
-
-      for O in SH1107.SH1107_Orientation'First
-        ..
-          SH1107.SH1107_Orientation'Last loop
-         S.Set_Orientation (O);
-
-         case DEMO_SELECTED is
-            when Show_All =>
-               Demos.Black_Background_White_Arrow (S);
-               Demos.White_Background_With_Black_Rectangle_Full_Screen
-                 (S);
-               Demos.Black_Background_With_White_Rectangle_Full_Screen
-                 (S);
-               Demos.White_Background_4_Black_Corners
-                 (S);
-
-               Demos.Black_Background_4_White_Corners
-                 (S);
-
-               Demos.Black_Background_White_Geometry
-                 (S);
-
-               Demos.White_Background_Black_Geometry
-                 (S);
-
-               Demos.White_Diagonal_Line_On_Black
-                 (S);
-
-               Demos.Black_Diagonal_Line_On_White
-                 (S);
-
-            when White_Background_With_Black_Rectangle_Full_Screen =>
-               Demos.White_Background_With_Black_Rectangle_Full_Screen
-                 (S);
-            when Black_Background_With_White_Rectangle_Full_Screen =>
-               Demos.Black_Background_With_White_Rectangle_Full_Screen
-                 (S);
-            when White_Background_4_Black_Corners =>
-               Demos.White_Background_4_Black_Corners
-                 (S);
-
-            when Black_Background_4_White_Corners =>
-               Demos.Black_Background_4_White_Corners
-                 (S);
-
-            when Black_Background_White_Geometry =>
-               Demos.Black_Background_White_Geometry
-                 (S);
-
-            when White_Background_Black_Geometry =>
-               Demos.White_Background_Black_Geometry
-                 (S);
-
-            when White_Diagonal_Line_On_Black =>
-               Demos.White_Diagonal_Line_On_Black
-                 (S);
-
-            when Black_Diagonal_Line_On_White =>
-               Demos.Black_Diagonal_Line_On_White
-                 (S);
-
-            when Black_Background_White_Arrow =>
-               Demos.Black_Background_White_Arrow (S);
-         end case;
-      end loop;
-   end Show_Demo_With;
+   --     procedure Show_Demo_With (S : in out SH1107.SH1107_Screen) is
+   --     begin
+   --        My_Color_Mode := SH1107.Color_Mode (This  => S);
+   --
+   --        SH1107.Initialize_Layer (This   => S,
+   --                                 Layer  => THE_LAYER,
+   --                                 Mode   => My_Color_Mode);
+   --
+   --        for O in SH1107.SH1107_Orientation'First
+   --          ..
+   --            SH1107.SH1107_Orientation'Last loop
+   --           S.Set_Orientation (O);
+   --
+   --           Demos.Show_Multiple_Demos (S, O, Demos_Selectable);
+   --        end loop;
+   --     end Show_Demo_With;
 
 begin
    Initialize_Device;
@@ -202,14 +176,30 @@ begin
    SH1107.Initialize (This    => My_Screen_SPI,
                       Orientation => ORIENTIATION_SELECTED,
                       Port    => My_SPI'Access,
-                      CS_SPI => My_CS_SPI'Access);
+                      CS_SPI => My_CS_SPI'Access,
+                      DC_SPI => My_DC_SPI'Access);
    if not SH1107.Initialized (This => My_Screen_SPI) then
       Pico.LED.Clear;
    end if;
 
+   Pico.LED.Set;
+
    loop
-      Show_Demo_With (My_Screen_I2C);
-      Show_Demo_With (My_Screen_SPI);
+      if True then
+         null;
+      else
+
+         if True then
+            Demos.Show_1_Demo (S    => My_Screen_I2C,
+                               O    => SH1107.Up,
+                               Demo =>  Demos.Black_Background_White_Arrow);
+         end if;
+         if True then
+            Demos.Show_1_Demo (S    => My_Screen_SPI,
+                               O    => SH1107.Up,
+                               Demo =>  Demos.Black_Background_White_Arrow);
+         end if;
+      end if;
    end loop;
 
 end Example_Pico;

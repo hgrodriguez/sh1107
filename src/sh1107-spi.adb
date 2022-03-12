@@ -15,12 +15,14 @@ package body SH1107.SPI is
    --  see .ads
    procedure Write_Command (Port   : not null HAL.SPI.Any_SPI_Port;
                             CS_SPI : not null HAL.GPIO.Any_GPIO_Point;
-                            Cmd    : HAL.UInt8) is
+                            DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
+                            Cmd         : HAL.UInt8) is
       use HAL;
-      Data   : constant HAL.SPI.SPI_Data_8b := (1 => 0, 2 => (Cmd));
+      Data   : constant HAL.SPI.SPI_Data_8b := (1 => (Cmd));
       Status : HAL.SPI.SPI_Status;
       use HAL.SPI;
    begin
+      DC_SPI.Clear;
       CS_SPI.Clear;
       Port.Transmit (Data    => Data,
                      Status  => Status);
@@ -35,10 +37,12 @@ package body SH1107.SPI is
    --  see .ads
    procedure Write_Data (Port   : not null HAL.SPI.Any_SPI_Port;
                          CS_SPI : not null HAL.GPIO.Any_GPIO_Point;
-                         Data   : HAL.SPI.SPI_Data_8b) is
+                         DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
+                         Data        : HAL.SPI.SPI_Data_8b) is
       Status : HAL.SPI.SPI_Status;
       use HAL.SPI;
    begin
+      DC_SPI.Set;
       CS_SPI.Clear;
       Port.Transmit (Data    => Data,
                      Status  => Status);
