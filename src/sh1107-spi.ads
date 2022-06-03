@@ -20,9 +20,19 @@ package SH1107.SPI is
    --     Port: SPI of the device using
    --     CS_SPI : as the select pin
    procedure Write_Command (Port   : not null HAL.SPI.Any_SPI_Port;
-                            CS_SPI : not null HAL.GPIO.Any_GPIO_Point;
                             DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
                             Cmd         : HAL.UInt8);
+
+   --------------------------------------------------------------------------
+   --  Writes the
+   --     Cmd: to the OLED with the
+   --     Arg: using
+   --     Port: SPI of the device using
+   --     CS_SPI : as the select pin
+   procedure Write_Command_Argument (Port   : not null HAL.SPI.Any_SPI_Port;
+                                     DC_SPI : not null HAL.GPIO.Any_GPIO_Point;
+                                     Cmd    : HAL.UInt8;
+                                     Arg    : HAL.UInt8);
 
    --------------------------------------------------------------------------
    --  Writes the
@@ -30,7 +40,6 @@ package SH1107.SPI is
    --     Port: SPI of the device using
    --     CS_SPI : as the select pin
    procedure Write_Data (Port   : not null HAL.SPI.Any_SPI_Port;
-                         CS_SPI : not null HAL.GPIO.Any_GPIO_Point;
                          DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
                          Data        : HAL.SPI.SPI_Data_8b);
 

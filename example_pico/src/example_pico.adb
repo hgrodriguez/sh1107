@@ -10,7 +10,7 @@
 --  SPDX-License-Identifier: BSD-3-Clause
 --
 
-with HAL;
+--  with HAL;
 --  with HAL.Framebuffer;
 with HAL.SPI;
 
@@ -111,22 +111,21 @@ procedure Example_Pico is
    My_Screen_I2C : SH1107.SH1107_Screen (Connect_With => SH1107.Connect_I2C);
 
    My_SPI    : RP.SPI.SPI_Port renames RP.Device.SPI_0;
-   My_CS_SPI : RP.GPIO.GPIO_Point renames Pico.GP5;
    My_DC_SPI : RP.GPIO.GPIO_Point renames Pico.GP13;
 
    procedure Initialize_SPI_0 is
       SCK    : RP.GPIO.GPIO_Point renames Pico.GP2;
       MOSI   : RP.GPIO.GPIO_Point renames Pico.GP3;
       MISO   : RP.GPIO.GPIO_Point renames Pico.GP4;
-      CS     : RP.GPIO.GPIO_Point renames My_CS_SPI;
+      CS     : RP.GPIO.GPIO_Point renames Pico.GP5;
       DC     : RP.GPIO.GPIO_Point renames My_DC_SPI;
-      CONFIG : constant RP.SPI.SPI_Configuration
-        := (Role      => RP.SPI.Master,
-            Baud      => 10_000_000,
-            Data_Size => HAL.SPI.Data_Size_8b,
-            Polarity  => RP.SPI.Active_Low,
-            Phase     => RP.SPI.Falling_Edge,
-            Blocking  => True);
+      CONFIG : constant RP.SPI.SPI_Configuration := (Role     => RP.SPI.Master,
+                                           Baud      => 1_000_000,
+                                           Data_Size => HAL.SPI.Data_Size_8b,
+                                           Polarity  => RP.SPI.Active_Low,
+                                           Phase     => RP.SPI.Rising_Edge,
+                                           Blocking  => True
+                                          );
 
    begin
       SCK.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up, RP.GPIO.SPI);
@@ -138,6 +137,7 @@ procedure Example_Pico is
       DC.Configure (RP.GPIO.Output, RP.GPIO.Pull_Up);
 
       My_SPI.Configure (CONFIG);
+
    end Initialize_SPI_0;
 
    My_Screen_SPI : SH1107.SH1107_Screen (Connect_With => SH1107.Connect_SPI);
@@ -176,7 +176,6 @@ begin
    SH1107.Initialize (This    => My_Screen_SPI,
                       Orientation => ORIENTIATION_SELECTED,
                       Port    => My_SPI'Access,
-                      CS_SPI => My_CS_SPI'Access,
                       DC_SPI => My_DC_SPI'Access);
    if not SH1107.Initialized (This => My_Screen_SPI) then
       Pico.LED.Clear;
@@ -185,7 +184,7 @@ begin
    Pico.LED.Set;
 
    loop
-      if True then
+      if False then
          null;
       else
 

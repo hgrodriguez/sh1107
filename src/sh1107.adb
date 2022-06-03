@@ -19,8 +19,9 @@ package body SH1107 is
    --  Commands
    --------------------------------------------------------------------------
    --  Display On/Off
-   CMD_DISPLAY_OFF : constant HAL.UInt8 := 16#AE#;
-   CMD_DISPLAY_ON  : constant HAL.UInt8 := 16#AF#;
+   CMD_DISPLAY_OFF       : constant HAL.UInt8 := 16#AE#;
+   CMD_DISPLAY_ON        : constant HAL.UInt8 := 16#AF#;
+--   CMD_FORCE_DISPLAY_ON  : constant HAL.UInt8 := 16#A5#;
 
    --  Setup commands to initialize the display
    CMD_PAGE_ADDRESSING_MODE                  : constant HAL.UInt8 := 16#20#;
@@ -30,6 +31,7 @@ package body SH1107 is
    CMD_SET_DISPLAY_OFFSET                    : constant HAL.UInt8 := 16#D3#;
    CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT : constant HAL.UInt8 := 16#C0#;
    CMD_SET_DISPLAY_START_LINE                : constant HAL.UInt8 := 16#DC#;
+   CMD_OUTPUT_RAM_TO_DISPLAY                 : constant HAL.UInt8 := 16#A4#;
 
    --  Memory addressing
    CMD_SET_PAGE_ADDRESS                      : constant HAL.UInt8 := 16#B0#;
@@ -48,6 +50,14 @@ package body SH1107 is
                             Cmd  : HAL.UInt8);
    --------------------------------------------------------------------------
    --  Writes the
+   --    Cmd : with the
+   --    Arg : to
+   --    This : Screen
+   procedure Write_Command_Argument (This : SH1107_Screen;
+                                     Cmd  : HAL.UInt8;
+                                     Arg  : HAL.UINt8);
+   --------------------------------------------------------------------------
+   --  Writes the
    --    Data : to
    --    This : Screen
    procedure Write_Data (This : SH1107_Screen;
@@ -63,15 +73,13 @@ package body SH1107 is
    begin
       Write_Command (This, CMD_DISPLAY_OFF);
       Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
-      Write_Command (This, CMD_SET_DISPLAY_OFFSET);
-      Write_Command (This, 16#00#);
+      Write_Command_Argument (This, CMD_SET_DISPLAY_OFFSET, 16#00#);
       Write_Command (This, CMD_SEGMENT_REMAP_DOWN);
       Write_Command (This, CMD_COMMON_OUPUT_SCAN_DIRECTION_INCREMENT);
-      Write_Command (This, CMD_SET_CONTRAST);
-      Write_Command (This, CMD_DISPLAY_ON);
+      Write_Command_Argument (This, CMD_SET_CONTRAST, 16#80#);
       Write_Command (This, CMD_NORMAL_DISPLAY);
-      Write_Command (This, CMD_SET_DISPLAY_START_LINE);
-      Write_Command (This, 16#00#);
+      Write_Command_Argument (This, CMD_SET_DISPLAY_START_LINE, 16#00#);
+      Write_Command (This, CMD_OUTPUT_RAM_TO_DISPLAY);
       Write_Command (This, CMD_DISPLAY_ON);
    end Initialize_Screen;
 
@@ -100,7 +108,6 @@ package body SH1107 is
    procedure Initialize (This        : in out SH1107_Screen;
                          Orientation : SH1107_Orientation;
                          Port        : not null HAL.SPI.Any_SPI_Port;
-                         CS_SPI      : not null HAL.GPIO.Any_GPIO_Point;
                          DC_SPI      : not null HAL.GPIO.Any_GPIO_Point) is
    begin
       if This.Connect_With /= Connect_SPI then
@@ -109,7 +116,6 @@ package body SH1107 is
 
       This.Orientation := Orientation;
       This.Port_SPI := Port;
-      This.CS_SPI := CS_SPI;
       This.DC_SPI := DC_SPI;
 
       Initialize_Screen (This);
@@ -345,11 +351,28 @@ package body SH1107 is
             SH1107.I2C.Write_Command (This.Port_I2C, This.Address_I2C, Cmd);
          when Connect_SPI =>
             SH1107.SPI.Write_Command (This.Port_SPI,
-                                      This.CS_SPI,
                                       This.DC_SPI,
                                       Cmd);
       end case;
    end Write_Command;
+
+   procedure Write_Command_Argument (This : SH1107_Screen;
+                                     Cmd  : HAL.UInt8;
+                                     Arg  : HAL.UINt8) is
+   begin
+      case This.Connect_With is
+         when Connect_I2C =>
+            SH1107.I2C.Write_Command_Argument (This.Port_I2C,
+                                               This.Address_I2C,
+                                               Cmd,
+                                               Arg);
+         when Connect_SPI =>
+            SH1107.SPI.Write_Command_Argument (This.Port_SPI,
+                                               This.DC_SPI,
+                                               Cmd,
+                                               Arg);
+      end case;
+   end Write_Command_Argument;
 
    procedure Write_Data (This : SH1107_Screen;
                          Data : HAL.UInt8_Array) is
@@ -364,7 +387,6 @@ package body SH1107 is
                SPI_DATA (I) := Data (I);
             end loop;
             SH1107.SPI.Write_Data (This.Port_SPI,
-                                   This.CS_SPI,
                                    This.DC_SPI,
                                    SPI_DATA);
       end case;
@@ -380,8 +402,9 @@ package body SH1107 is
       for Page_Number in HAL.UInt8 (0) .. HAL.UInt8 (15) loop
          Page_Address := CMD_SET_PAGE_ADDRESS + Page_Number;
          Write_Command (This, CMD_SET_LOWER_COLUMN_ADDRESS);
-         Write_Command (This, CMD_SET_HIGHER_COLUMN_ADDRESS);
-         Write_Command (This, Page_Address);
+         Write_Command_Argument (This,
+                                 CMD_SET_HIGHER_COLUMN_ADDRESS,
+                                 Page_Address);
          Write_Data (This,
                      (1 => 16#40#) & Data (Index .. Index + 128));
          Index := Index + 128;
