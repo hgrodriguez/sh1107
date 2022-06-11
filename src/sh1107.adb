@@ -38,6 +38,9 @@ package body SH1107 is
    CMD_SET_LOWER_COLUMN_ADDRESS              : constant HAL.UInt8 := 16#00#;
    CMD_SET_HIGHER_COLUMN_ADDRESS             : constant HAL.UInt8 := 16#10#;
 
+   --  COmmand prefix
+   CMD_PREFIX_DATA                           : constant HAL.UInt8 := 16#40#;
+
    --------------------------------------------------------------------------
    --  Package internal rocedures to write to the device
    --  Implementation at the end of the file.
@@ -71,7 +74,7 @@ package body SH1107 is
 
    procedure Initialize_Screen (This        : in out SH1107_Screen) is
    begin
-      Write_Command (This, CMD_DISPLAY_OFF);
+      This.Turn_Off;
       Write_Command (This, CMD_PAGE_ADDRESSING_MODE);
       Write_Command_Argument (This, CMD_SET_DISPLAY_OFFSET, 16#00#);
       Write_Command (This, CMD_SEGMENT_REMAP_DOWN);
@@ -80,7 +83,13 @@ package body SH1107 is
       Write_Command (This, CMD_NORMAL_DISPLAY);
       Write_Command_Argument (This, CMD_SET_DISPLAY_START_LINE, 16#00#);
       Write_Command (This, CMD_OUTPUT_RAM_TO_DISPLAY);
-      Write_Command (This, CMD_DISPLAY_ON);
+      This.Turn_On;
+
+      --  make screen black
+      This.Memory_Layer.Native_Source := 0;
+      This.Memory_Layer.Fill;
+      This.Update_Layer (Layer     => 1);
+
    end Initialize_Screen;
 
    --------------------------------------------------------------------------
@@ -233,7 +242,7 @@ package body SH1107 is
       pragma Unreferenced (Copy_Back);
    begin
       if Layer /= 1 then
-         raise Program_Error;
+         raise Program_Error with "This screen only supports one layer";
       end if;
 
       This.Write_Raw_Pixels (This.Memory_Layer.Data);
@@ -340,9 +349,11 @@ package body SH1107 is
       Buffer.Data := (others => Val);
    end Fill;
 
-   --------------------------------------------------------------------------
+   --========================================================================
+   --
    --  Package internal procedures to write to the device
-   --------------------------------------------------------------------------
+   --
+   --========================================================================
    procedure Write_Command (This : SH1107_Screen;
                             Cmd  : HAL.UInt8) is
    begin
@@ -395,6 +406,8 @@ package body SH1107 is
    procedure Write_Raw_Pixels (This : SH1107_Screen;
                                Data : HAL.UInt8_Array) is
       Index         : Natural := 1;
+      Data_Prefix   : constant HAL.UInt8_Array (1 .. 1)
+        := (1 => CMD_PREFIX_DATA);
 
       Page_Address  : HAL.UInt8;
       use HAL;
@@ -405,8 +418,13 @@ package body SH1107 is
          Write_Command_Argument (This,
                                  CMD_SET_HIGHER_COLUMN_ADDRESS,
                                  Page_Address);
-         Write_Data (This,
-                     (1 => 16#40#) & Data (Index .. Index + 128));
+         if This.Connect_With = Connect_I2C then
+            Write_Data (This, Data_Prefix & Data (Index .. Index + 128));
+         else
+            Write_Command (This, CMD_PREFIX_DATA);
+            Write_Data (This, Data (Index .. Index + 128));
+         end if;
+
          Index := Index + 128;
       end loop;
    end Write_Raw_Pixels;

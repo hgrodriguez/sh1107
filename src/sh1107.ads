@@ -36,7 +36,7 @@ package SH1107 is
 
    --------------------------------------------------------------------------
    --  This driver can only support 128 x 128 bits black/white
-   --  Therefore we daclare those constants here
+   --  Therefore we declare those constants here
    THE_WIDTH  : constant Positive := 128;
    THE_HEIGHT : constant Positive := 128;
 
@@ -66,6 +66,10 @@ package SH1107 is
 
    --------------------------------------------------------------------------
    --  Initializes an OLED screen connected by I2C
+   --  This        : the screen to use
+   --  Orientation : the initial orientation of *This*
+   --  Port        : the I2C port, *This* is connnected to
+   --  Address     : the I2C address of *This* on *Port*
    procedure Initialize (This        : in out SH1107_Screen;
                          Orientation : SH1107_Orientation;
                          Port        : not null HAL.I2C.Any_I2C_Port;
@@ -73,6 +77,11 @@ package SH1107 is
 
    --------------------------------------------------------------------------
    --  Initializes an OLED screen connected by SPI
+   --  This        : the screen to use
+   --  Orientation : the initial orientation of *This*
+   --  Port        : the SPI port, *This* is connnected to
+   --  DC_SPI      : the GPIO, where the Data/Command control
+   --                for *This* is connected to
    procedure Initialize (This        : in out SH1107_Screen;
                          Orientation : SH1107_Orientation;
                          Port        : not null HAL.SPI.Any_SPI_Port;
@@ -88,9 +97,8 @@ package SH1107 is
 
    --------------------------------------------------------------------------
    --  Sets the logical orientation of the display
-   procedure Set_Orientation
-     (This        : in out SH1107_Screen;
-      Orientation : SH1107_Orientation);
+   procedure Set_Orientation (This        : in out SH1107_Screen;
+                              Orientation : SH1107_Orientation);
 
    --========================================================================
    --

@@ -11,5 +11,3 @@ website = "https://github.com/hgrodriguez/sh1107"
 
 [[depends-on]]  # Added by alr
 embedded_components = "~0.1.0"  # Added by alr
-[[depends-on]]  # Added by alr
-gnat_arm_elf = "^11.2.3"  # Added by alr

@@ -14,27 +14,29 @@ with HAL.I2C;
 private package SH1107.I2C is
 
    --------------------------------------------------------------------------
-   --  Writes the
-   --     Cmd: to the OLED using
-   --     Port / Address: I2C of the device
+   --  Using the
+   --     Port / Address: I2C of the screen
+   --  writes
+   --     Cmd: to the screen
    procedure Write_Command (Port    : not null HAL.I2C.Any_I2C_Port;
                             Address : HAL.I2C.I2C_Address;
                             Cmd     : HAL.UInt8);
 
    --------------------------------------------------------------------------
-   --  Writes the
-   --     Cmd: to the OLED with the
-   --     Arg: using
-   --     Port / Address: I2C of the device
+   --  Using the
+   --     Port / Address: I2C of the screen
+   --  writes
+   --     Cmd with Arg: to the screen
    procedure Write_Command_Argument (Port    : not null HAL.I2C.Any_I2C_Port;
                                      Address : HAL.I2C.I2C_Address;
                                      Cmd     : HAL.UInt8;
                                      Arg     : HAL.UInt8);
 
    --------------------------------------------------------------------------
+   --  Using the
+   --     Port / Address: I2C of the screen
    --  Writes the
-   --     Data: to the OLED using
-   --     Port / Address: I2C of the device
+   --     Data: to the screen
    procedure Write_Data (Port    : not null HAL.I2C.Any_I2C_Port;
                          Address : HAL.I2C.I2C_Address;
                          Data    : HAL.UInt8_Array);

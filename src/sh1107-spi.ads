@@ -15,32 +15,34 @@ with HAL.SPI;
 package SH1107.SPI is
 
    --------------------------------------------------------------------------
-   --  Writes the
-   --     Cmd: to the OLED using
-   --     Port: SPI of the device using
-   --     CS_SPI : as the select pin
+   --  Using the
+   --     Port   : SPI of the screen
+   --     DC_SPI : Data/Command GPIO
+   --  writes
+   --     Cmd    : to the screen
    procedure Write_Command (Port   : not null HAL.SPI.Any_SPI_Port;
-                            DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
-                            Cmd         : HAL.UInt8);
+                            DC_SPI : not null HAL.GPIO.Any_GPIO_Point;
+                            Cmd    : HAL.UInt8);
 
    --------------------------------------------------------------------------
-   --  Writes the
-   --     Cmd: to the OLED with the
-   --     Arg: using
-   --     Port: SPI of the device using
-   --     CS_SPI : as the select pin
+   --  Using the
+   --     Port   : SPI of the screen
+   --     DC_SPI : Data/Command GPIO
+   --  writes
+   --     Cmd and Arg    : to the screen
    procedure Write_Command_Argument (Port   : not null HAL.SPI.Any_SPI_Port;
                                      DC_SPI : not null HAL.GPIO.Any_GPIO_Point;
                                      Cmd    : HAL.UInt8;
                                      Arg    : HAL.UInt8);
 
    --------------------------------------------------------------------------
-   --  Writes the
+   --  Using the
+   --     Port   : SPI of the screen
+   --     DC_SPI : Data/Command GPIO
+   --  writes
    --     Data: to the OLED using
-   --     Port: SPI of the device using
-   --     CS_SPI : as the select pin
    procedure Write_Data (Port   : not null HAL.SPI.Any_SPI_Port;
-                         DC_SPI      : not null HAL.GPIO.Any_GPIO_Point;
-                         Data        : HAL.SPI.SPI_Data_8b);
+                         DC_SPI : not null HAL.GPIO.Any_GPIO_Point;
+                         Data   : HAL.SPI.SPI_Data_8b);
 
 end SH1107.SPI;
