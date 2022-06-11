@@ -1,6 +1,6 @@
 name = "sh1107"
 description = "Driver for the SH1107/OLED 128x128 monochrome display"
-version = "1.2.2"
+version = "2.2.0"
 licenses = "BSD-3-Clause"
 
 authors = ["Holger Rodriguez"]
